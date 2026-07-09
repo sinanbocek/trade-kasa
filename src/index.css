@@ -1,0 +1,130 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+
+  /* Yüzeyler */
+  --bg: #f9f9f7;
+  --surface: #ffffff;
+  --surface-2: #f3f2ef;
+  --surface-3: #ebeae6;
+
+  /* Metin */
+  --ink: #0b0b0b;
+  --ink-2: #52514e;
+  --muted: #898781;
+
+  /* Çizgiler */
+  --border: rgba(11, 11, 11, 0.1);
+  --border-strong: rgba(11, 11, 11, 0.16);
+  --grid: #e1e0d9;
+
+  /* Vurgu (accent) — dataviz kategorik slot 1 */
+  --accent: #2a78d6;
+  --accent-strong: #184f95;
+  --accent-soft: #e7f0fc;
+  --accent-soft-strong: #cde2fb;
+
+  /* Durum renkleri (sabit — asla temalanmaz) */
+  --good: #0ca30c;
+  --good-soft: #e6f6e6;
+  --warning: #c98500;
+  --warning-soft: #fef3dc;
+  --serious: #d4652f;
+  --serious-soft: #fce9e0;
+  --critical: #d03b3b;
+  --critical-soft: #fbe6e6;
+
+  /* Kategorik palet (kasa dağılımı vb.) */
+  --cat-1: #2a78d6; /* mavi */
+  --cat-2: #1baf7a; /* deniz yeşili */
+  --cat-3: #eda100; /* sarı */
+  --cat-4: #008300; /* yeşil */
+
+  --shadow-card: 0 1px 2px rgba(11, 11, 11, 0.04), 0 8px 24px -12px rgba(11, 11, 11, 0.12);
+  --shadow-pop: 0 4px 16px -4px rgba(11, 11, 11, 0.18);
+}
+
+:root.dark {
+  color-scheme: dark;
+
+  --bg: #0d0d0d;
+  --surface: #171716;
+  --surface-2: #1f1f1e;
+  --surface-3: #292927;
+
+  --ink: #ffffff;
+  --ink-2: #c3c2b7;
+  --muted: #8f8d87;
+
+  --border: rgba(255, 255, 255, 0.09);
+  --border-strong: rgba(255, 255, 255, 0.16);
+  --grid: #2c2c2a;
+
+  --accent: #3987e5;
+  --accent-strong: #86b6ef;
+  --accent-soft: rgba(57, 135, 229, 0.14);
+  --accent-soft-strong: rgba(57, 135, 229, 0.24);
+
+  --good: #0ca30c;
+  --good-soft: rgba(12, 163, 12, 0.16);
+  --warning: #fab219;
+  --warning-soft: rgba(250, 178, 25, 0.16);
+  --serious: #ec835a;
+  --serious-soft: rgba(236, 131, 90, 0.16);
+  --critical: #e66767;
+  --critical-soft: rgba(230, 103, 103, 0.16);
+
+  --cat-1: #3987e5;
+  --cat-2: #199e70;
+  --cat-3: #c98500;
+  --cat-4: #1fb81f;
+
+  --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.3), 0 8px 24px -12px rgba(0, 0, 0, 0.5);
+  --shadow-pop: 0 4px 20px -4px rgba(0, 0, 0, 0.6);
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  color: var(--ink);
+  transition: background-color 0.2s ease, color 0.2s ease;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Sayısal input oklarını gizle */
+input[type='number']::-webkit-outer-spin-button,
+input[type='number']::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+input[type='number'] {
+  -moz-appearance: textfield;
+}
+
+::selection {
+  background: var(--accent-soft-strong);
+}
+
+/* İnce, sessiz scrollbar */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border-strong);
+  border-radius: 999px;
+  border: 2px solid var(--bg);
+}

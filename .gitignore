@@ -1,0 +1,19 @@
+node_modules
+dist
+dist-ssr
+*.local
+.DS_Store
+.env
+.env.*
+!.env.example
+.firebase
+firebase-debug.log
+*.log
+.vscode/*
+!.vscode/extensions.json
+
+# TypeScript build info
+*.tsbuildinfo
+
+# Claude Code yerel ayarları
+.claude/
