@@ -106,3 +106,10 @@
   - `title("ışık")` -> `"Işık"` davranışı doğrulandı; bağımsız kontrol testi `name("ırmak yıldız")` -> `"Irmak Yıldız"` eklendi.
   - `text/index.ts` dosyası taranarak `işık`/hardcode 0 adet, ham `toUpperCase`/`toLowerCase` 0 adet olarak doğrulandı.
   - Vitest testleri (129 test) %100 YEŞİL geçti (`npx tsc --noEmit` 0 hata).
+- **Adım 2e (ABACUS currency Kur Çevrimi Motoru)** tamamlandı:
+  - `convert` (tekli kur çevrimi: `amountMinor × rate → kuruş half-up`) ve `cross` (çapraz kur çevrimi: `amountMinor × fromRate / toRate → kuruş half-up`) fonksiyonları eklendi.
+  - Kur enjeksiyon prensibi uygulandı (fetch/DB/env yok; `rate <= 0` veya geçersizse `null` döner).
+  - Tüm çarpma/bölme/yuvarlama hesaplamaları `math` (Decimal.js) motoru üzerinden yapıldı (ham `Math.*` 0 adet).
+  - TDD disipliniyle `currency.test.ts` yazıldı (STUB ile 6 test kırmızı kanıtlandı).
+  - Barrel export (`src/domain/abacus/index.ts`) üzerinden `currency` dışa aktarıldı.
+  - Vitest testleri (140 test) %100 YEŞİL geçti (`npx tsc --noEmit` 0 hata).

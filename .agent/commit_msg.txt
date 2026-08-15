@@ -1,7 +1,9 @@
-feat(abacus): currency kur çevrimi motoru eklendi
+feat(abacus): validate motoru (VKN/TCKN/IBAN checksum + İKN/e-posta) eklendi
 
-- convert (tutar × kur → kuruş, half-up yuvarlanmış) eklendi
-- cross (ara birim üzerinden çapraz kur çevrimi: tutar × fromRate / toRate → kuruş half-up) eklendi
-- kur her zaman dışarıdan enjekte edilir (fetch/DB/env yok); geçersiz/sıfır kurda null döner
-- tüm çarpma/bölme/yuvarlama işlemleri math (Decimal.js) motoru üzerinden gerçekleştirildi (ham Math. kullanımı 0)
-- 140 test %100 yeşil
+- VKN resmi 10 haneli checksum algoritması (POW_2_MAP ile Math.pow'suz) eklendi
+- TCKN resmi 11 haneli checksum algoritması (odd/even sum, d10, d11 ve 11111111111 koruması) eklendi
+- IBAN TR 26-karakter mod-97 algoritması (basamak basamak mod-97) eklendi
+- İKN format (YYYY/N...) ve e-posta doğrulama fonksiyonları eklendi
+- geçerli test örnekleri algoritmadan üretildi
+- ham Math. kullanımı 0 adet
+- 153 test %100 yeşil
