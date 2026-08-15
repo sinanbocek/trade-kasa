@@ -36,4 +36,5 @@
   - `money.compact` büyük tutar kısaltma motoru (K/M ve B/Mn/Mr stili seçenekleri) eklendi.
   - Gereksiz ondalık sıfır temizliği (`1,00M -> 1M`), 1.000 TL altı normal `format`'a düşme, negatif eksi öneki sağlandı.
   - TDD disipliniyle `money.test.ts` yazıldı (STUB ile 12 test kırmızı kanıtlandı).
-  - Vitest testleri (72 test) %100 YEŞİL geçti (`npx tsc --noEmit` 0 hata).
+  - `compact` ölçek-sınırı yuvarlama hatası (`₺1000K -> ₺1M`, `₺1000Mn -> ₺1Mr`) TDD ile çözüldü (3 test kırmızı kanıtlandı ve yeşile çevrildi).
+  - Vitest testleri (76 test) %100 YEŞİL geçti (`npx tsc --noEmit` 0 hata).
