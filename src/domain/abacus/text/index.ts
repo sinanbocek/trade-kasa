@@ -269,6 +269,16 @@ export function websiteUrl(raw: string): string {
   return `https://${w.stored}`;
 }
 
+/** Kişi adı normalizasyonu (ABACUS-SPEC §3.5-e) */
+export function name(raw: string): NormalizeResult {
+  return { stored: '', display: '', raw: raw ?? '', valid: false }; // STUB
+}
+
+/** Firma unvanı normalizasyonu (ABACUS-SPEC §3.5-e) */
+export function company(raw: string): NormalizeResult {
+  return { stored: '', display: '', raw: raw ?? '', valid: false }; // STUB
+}
+
 /**
  * Sayıyı Türkçe yazıya çeviren çekirdek fonksiyon (ABACUS-SPEC §3.5).
  * "Bir" düşme kuralını uygular: 100 -> "Yüz", 1000 -> "Bin", ancak 1.000.000 -> "BirMilyon".

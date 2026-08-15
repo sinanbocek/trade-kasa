@@ -84,4 +84,12 @@
   - `title` Türkçe başlık harf motoru kelime baş harfi büyütme ve kısaltma/bağlaç istisna sözlüğü (`ve`, `ile`, `veya`, `ya`, `da`, `de` küçük, `TYC`, `A.Ş.` vb. koruma) ile eklendi.
   - TDD disipliniyle `text.test.ts` yazıldı (STUB ile `upper` ve `title` kırmızı kanıtlandı).
   - `text/index.ts` dosyası taranarak ham `toUpperCase`/`toLowerCase` kullanımı 0 adet olarak doğrulandı.
-  - Vitest testleri (122 test) %100 YEŞİL geçti (`npx tsc --noEmit` 0 hata).
+- **Adım 2d/8 (ABACUS text.join ve Normalize telefon/e-posta/web Motoru)** tamamlandı:
+  - `join` Türkçe liste bağlama motoru (`A, B ve C`, boş eleman filtreleme) eklendi.
+  - `phone` Türkiye cep telefonu E.164 (`+905321234567`) stored + display (`+90 (532) 123 45 67`) + `whatsapp` direct link (`https://wa.me/905321234567`) ile eklendi.
+  - `email` trim + `toAsciiLower` ve basit regex kontrolü ile eklendi.
+  - `website` çıplak host (`example.com`) + `websiteUrl` (`https://example.com`) ile eklendi.
+  - `NormalizeResult` arabirimi (`stored`, `display`, `raw`, `valid`) tanımlandı ("düzelt ama aslını sakla").
+  - TDD disipliniyle `text.test.ts` yazıldı (STUB ile 5 test kırmızı kanıtlandı). `toAsciiLower` eklenerek ASCII e-posta küçültme davranışı netleştirildi.
+  - `text/index.ts` dosyası taranarak ham `toUpperCase`/`toLowerCase` kullanımı 0 adet olarak doğrulandı.
+  - Vitest testleri (127 test) %100 YEŞİL geçti (`npx tsc --noEmit` 0 hata).

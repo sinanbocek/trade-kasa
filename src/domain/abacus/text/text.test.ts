@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
+  company,
   email,
   endsWithHardConsonant,
   endsWithVowel,
@@ -8,6 +9,7 @@ import {
   join,
   lastVowel,
   lower,
+  name,
   numberToWords,
   phone,
   suffix,
@@ -264,6 +266,60 @@ describe('ABACUS text.join ve normalize (telefon/e-posta/web) motoru', () => {
       expect(w4.stored).toBe('');
       expect(w4.valid).toBe(false);
       expect(websiteUrl('')).toBe('');
+    });
+  });
+});
+
+describe('ABACUS text.name ve company normalizasyonu (motor kapanışı)', () => {
+  describe('name (kişi adı normalizasyonu)', () => {
+    it('kişi adını temizler, title casing uygular ve ham girdiyi saklar', () => {
+      const n1 = name('ahmet yılmaz');
+      expect(n1.stored).toBe('Ahmet Yılmaz');
+      expect(n1.display).toBe('Ahmet Yılmaz');
+      expect(n1.raw).toBe('ahmet yılmaz');
+      expect(n1.valid).toBe(true);
+
+      const n2 = name('  MEHMET   ali  ÖZ ');
+      expect(n2.stored).toBe('Mehmet Ali Öz');
+      expect(n2.display).toBe('Mehmet Ali Öz');
+      expect(n2.valid).toBe(true);
+
+      const n3 = name('işık deniz');
+      expect(n3.stored).toBe('Işık Deniz');
+      expect(n3.valid).toBe(true);
+
+      const n4 = name('');
+      expect(n4.stored).toBe('');
+      expect(n4.valid).toBe(false);
+    });
+  });
+
+  describe('company (firma unvanı normalizasyonu)', () => {
+    it('firma unvanlarındaki unvan kısaltmalarını standart formlarına dönüştürür', () => {
+      const c1 = company('abc sanayi ve ticaret limited şirketi');
+      expect(c1.stored).toBe('Abc San. ve Tic. Ltd.Şti.');
+      expect(c1.display).toBe('Abc San. ve Tic. Ltd.Şti.');
+      expect(c1.valid).toBe(true);
+
+      const c2 = company('xyz inşaat anonim şirketi');
+      expect(c2.stored).toBe('Xyz İnş. A.Ş.');
+      expect(c2.valid).toBe(true);
+
+      const c3 = company('deniz ithalat ihracat ltd şti');
+      expect(c3.stored).toBe('Deniz İth. İhr. Ltd.Şti.');
+      expect(c3.valid).toBe(true);
+
+      const c4 = company('öz san. tic. a.ş.');
+      expect(c4.stored).toBe('Öz San. Tic. A.Ş.');
+      expect(c4.valid).toBe(true);
+
+      const c5 = company('tyc grup pazarlama');
+      expect(c5.stored).toBe('TYC Grup Paz.');
+      expect(c5.valid).toBe(true);
+
+      const c6 = company('');
+      expect(c6.stored).toBe('');
+      expect(c6.valid).toBe(false);
     });
   });
 });
