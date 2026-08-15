@@ -8,6 +8,53 @@ const ONES = ['', 'Bir', 'İki', 'Üç', 'Dört', 'Beş', 'Altı', 'Yedi', 'Seki
 const TENS = ['', 'On', 'Yirmi', 'Otuz', 'Kırk', 'Elli', 'Altmış', 'Yetmiş', 'Seksen', 'Doksan'];
 const SCALES = ['', 'Bin', 'Milyon', 'Milyar', 'Trilyon'];
 
+const TR_VOWELS = ['a', 'e', 'ı', 'i', 'o', 'ö', 'u', 'ü'];
+const BACK_VOWELS = ['a', 'ı', 'o', 'u'];
+const ROUNDED_VOWELS = ['o', 'ö', 'u', 'ü'];
+const HARD_CONSONANTS = ['f', 's', 't', 'k', 'ç', 'ş', 'h', 'p'];
+
+/**
+ * Türkçe harf küçültme yardımcısı (Intl / ham toLowerCase kullanılmaz).
+ * 'İ' -> 'i' ve 'I' -> 'ı' dönüşümlerini doğru yapar.
+ */
+export function toTrLower(str: string): string {
+  let res = '';
+  for (let i = 0; i < str.length; i++) {
+    const ch = str[i];
+    switch (ch) {
+      case 'İ':
+        res += 'i';
+        break;
+      case 'I':
+        res += 'ı';
+        break;
+      case 'Ç':
+        res += 'ç';
+        break;
+      case 'Ğ':
+        res += 'ğ';
+        break;
+      case 'Ö':
+        res += 'ö';
+        break;
+      case 'Ş':
+        res += 'ş';
+        break;
+      case 'Ü':
+        res += 'ü';
+        break;
+      default:
+        if (ch && ch >= 'A' && ch <= 'Z') {
+          res += String.fromCharCode(ch.charCodeAt(0) + 32);
+        } else if (ch) {
+          res += ch;
+        }
+        break;
+    }
+  }
+  return res;
+}
+
 /**
  * Sayıyı Türkçe yazıya çeviren çekirdek fonksiyon (ABACUS-SPEC §3.5).
  * "Bir" düşme kuralını uygular: 100 -> "Yüz", 1000 -> "Bin", ancak 1.000.000 -> "BirMilyon".
@@ -88,4 +135,47 @@ export function numberToWords(n: number, opts?: NumberToWordsOptions): string {
   }
 
   return parts.join(joinStr);
+}
+
+/** Kelimedeki son ünlüyü döner (a/e/ı/i/o/ö/u/ü). Bulunamazsa null. */
+export function lastVowel(word: string): string | null {
+  if (!word) return null;
+  const lower = toTrLower(word);
+  for (let i = lower.length - 1; i >= 0; i--) {
+    const char = lower[i];
+    if (char && TR_VOWELS.includes(char)) {
+      return char;
+    }
+  }
+  return null;
+}
+
+/** Ünlünün kalın (a, ı, o, u) olup olmadığını kontrol eder. */
+export function isBackVowel(vowel: string): boolean {
+  if (!vowel) return false;
+  const lower = toTrLower(vowel);
+  return BACK_VOWELS.includes(lower);
+}
+
+/** Ünlünün yuvarlak (o, ö, u, ü) olup olmadığını kontrol eder. */
+export function isRoundedVowel(vowel: string): boolean {
+  if (!vowel) return false;
+  const lower = toTrLower(vowel);
+  return ROUNDED_VOWELS.includes(lower);
+}
+
+/** Kelimenin son harfinin sert ünsüz (f, s, t, k, ç, ş, h, p) olup olmadığını kontrol eder. */
+export function endsWithHardConsonant(word: string): boolean {
+  if (!word) return false;
+  const lower = toTrLower(word);
+  const lastChar = lower[lower.length - 1];
+  return lastChar ? HARD_CONSONANTS.includes(lastChar) : false;
+}
+
+/** Kelimenin son harfinin ünlü (a/e/ı/i/o/ö/u/ü) olup olmadığını kontrol eder. */
+export function endsWithVowel(word: string): boolean {
+  if (!word) return false;
+  const lower = toTrLower(word);
+  const lastChar = lower[lower.length - 1];
+  return lastChar ? TR_VOWELS.includes(lastChar) : false;
 }

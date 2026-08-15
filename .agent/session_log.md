@@ -42,4 +42,8 @@
   - Sabit Türkçe ay adları dizisi kullanıldı; `Intl`/`toLocale*` kullanılmadan manuel ISO ayrıştırması sağlandı.
   - TDD disipliniyle `date.test.ts` yazıldı (STUB ile 9 test kırmızı kanıtlandı).
   - ABACUS barrel export (`src/domain/abacus/index.ts`) üzerinden `date` dışa aktarıldı.
-  - Vitest testleri (85 test) %100 YEŞİL geçti (`npx tsc --noEmit` 0 hata).
+- **Adım 2c/2 (ABACUS date relative & gün aritmetiği Motoru)** tamamlandı:
+  - `relative` (bugün/dün/yarın/N gün önce-sonra), `daysBetween`, `daysUntil`, `dayName` (Pzt..Paz) fonksiyonları eklendi.
+  - Bugün tarihi parametre olarak enjekte edildi (parametresiz `new Date()` kullanımı sıfırlandı).
+  - TDD disipliniyle `date.test.ts` yazıldı (STUB ile 7 test kırmızı kanıtlandı).
+  - Vitest testleri (92 test) %100 YEŞİL geçti (`npx tsc --noEmit` 0 hata).

@@ -1,5 +1,12 @@
 import { describe, expect, it } from 'vitest';
-import { numberToWords } from './index';
+import {
+  endsWithHardConsonant,
+  endsWithVowel,
+  isBackVowel,
+  isRoundedVowel,
+  lastVowel,
+  numberToWords,
+} from './index';
 
 describe('ABACUS text.numberToWords motoru', () => {
   it('0 için Sıfır döner', () => {
@@ -69,6 +76,56 @@ describe('ABACUS text.numberToWords motoru', () => {
 
     it('1100000 -> BirMilyonYüzBin', () => {
       expect(numberToWords(1100000)).toBe('BirMilyonYüzBin');
+    });
+  });
+});
+
+describe('ABACUS text ek-fonetiği temel yardımcıları', () => {
+  describe('lastVowel', () => {
+    it('kelimedeki son ünlüyü döner', () => {
+      expect(lastVowel('kırk')).toBe('ı');
+      expect(lastVowel('üç')).toBe('ü');
+      expect(lastVowel('altı')).toBe('ı');
+      expect(lastVowel('yedi')).toBe('i');
+      expect(lastVowel('bin')).toBe('i');
+    });
+
+    it('ücretsiz/ünlüsüz kelimede null döner', () => {
+      expect(lastVowel('krk')).toBeNull();
+    });
+  });
+
+  describe('isBackVowel', () => {
+    it('kalın ünlü kontrolü yapar (a, ı, o, u)', () => {
+      expect(isBackVowel('a')).toBe(true);
+      expect(isBackVowel('ı')).toBe(true);
+      expect(isBackVowel('e')).toBe(false);
+      expect(isBackVowel('ü')).toBe(false);
+    });
+  });
+
+  describe('isRoundedVowel', () => {
+    it('yuvarlak ünlü kontrolü yapar (o, ö, u, ü)', () => {
+      expect(isRoundedVowel('u')).toBe(true);
+      expect(isRoundedVowel('ö')).toBe(true);
+      expect(isRoundedVowel('ı')).toBe(false);
+      expect(isRoundedVowel('a')).toBe(false);
+    });
+  });
+
+  describe('endsWithHardConsonant', () => {
+    it('fıstıkçı şahap sert ünsüz kontrolünü doğru yapar', () => {
+      expect(endsWithHardConsonant('kırk')).toBe(true);
+      expect(endsWithHardConsonant('beş')).toBe(true);
+      expect(endsWithHardConsonant('bin')).toBe(false);
+      expect(endsWithHardConsonant('altı')).toBe(false);
+    });
+  });
+
+  describe('endsWithVowel', () => {
+    it('son harfin ünlü olup olmadığını kontrol eder', () => {
+      expect(endsWithVowel('altı')).toBe(true);
+      expect(endsWithVowel('kırk')).toBe(false);
     });
   });
 });
