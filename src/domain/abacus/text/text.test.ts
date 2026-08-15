@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { email as validateEmail } from '../validate';
 import {
   company,
   email,
@@ -241,6 +242,21 @@ describe('ABACUS text.join ve normalize (telefon/e-posta/web) motoru', () => {
       const e2 = email('abc');
       expect(e2.stored).toBe('');
       expect(e2.valid).toBe(false);
+    });
+
+    it('text.email ve validate.email arasında tam tutarlılık sağlar (DRY)', () => {
+      const samples = [
+        'a@b.com',
+        'info@tradekasa.com',
+        '  USER@DOMAIN.ORG  ',
+        'abc',
+        '@b.com',
+        'a@b',
+        '',
+      ];
+      for (const sample of samples) {
+        expect(email(sample).valid).toBe(validateEmail(sample.trim()));
+      }
     });
   });
 

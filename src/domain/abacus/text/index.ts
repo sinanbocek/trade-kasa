@@ -1,5 +1,6 @@
 import { div, floor, mod } from '../math';
 import { format as formatMoney } from '../money';
+import { email as validateEmail } from '../validate';
 
 export interface NumberToWordsOptions {
   spaced?: boolean;
@@ -253,13 +254,12 @@ export function whatsapp(raw: string): string {
   return `https://wa.me/${p.stored.slice(1)}`;
 }
 
-/** E-posta adresi normalizasyonu (ABACUS-SPEC §3.5-e) */
+/** E-posta adresi normalizasyonu (ABACUS-SPEC §3.5-e - validate.email SSOT kullanımı) */
 export function email(raw: string): NormalizeResult {
   if (!raw) return { stored: '', display: '', raw: raw ?? '', valid: false };
   const clean = toAsciiLower(raw.trim());
 
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  if (emailRegex.test(clean)) {
+  if (validateEmail(clean)) {
     return { stored: clean, display: clean, raw, valid: true };
   }
 

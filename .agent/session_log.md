@@ -113,3 +113,9 @@
   - TDD disipliniyle `currency.test.ts` yazıldı (STUB ile 6 test kırmızı kanıtlandı).
   - Barrel export (`src/domain/abacus/index.ts`) üzerinden `currency` dışa aktarıldı.
   - Vitest testleri (140 test) %100 YEŞİL geçti (`npx tsc --noEmit` 0 hata).
+- **Adım 2f (ABACUS validate Doğrulama Motoru)** tamamlandı:
+  - `vkn` (resmi 10 haneli VKN checksum), `tckn` (resmi 11 haneli TCKN checksum + 11111111111 koruması), `ikn` (İhale Kayıt No `YYYY/N...` format), `iban` (TR 26-karakter mod-97), `email` (e-posta format) doğrulama fonksiyonları eklendi.
+  - VKN hesabında `Math.pow` yerine sabit `POW_2_MAP` haritası kullanıldı; IBAN mod-97 hesabı basamak basamak mod-97 algoritması ile yapıldı (ham `Math.*` 0 adet).
+  - Algoritmik olarak doğrulanmış geçerli örnekler (`vkn("1111111114")`, `tckn("10000000078")`, `iban("TR40 0006 2000 0000 0000 0000 01")`, `ikn("2026/1298071")`, `email("a@b.com")`) ile TDD disiplininde test edildi (STUB ile 5 test kırmızı kanıtlandı).
+  - Barrel export (`src/domain/abacus/index.ts`) üzerinden `validate` dışa aktarıldı.
+  - Vitest testleri (153 test) %100 YEŞİL geçti (`npx tsc --noEmit` 0 hata).

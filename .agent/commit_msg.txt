@@ -1,9 +1,8 @@
-feat(abacus): validate motoru (VKN/TCKN/IBAN checksum + İKN/e-posta) eklendi
+refactor(abacus): email doğrulama tek kaynağa indirildi (DRY)
 
-- VKN resmi 10 haneli checksum algoritması (POW_2_MAP ile Math.pow'suz) eklendi
-- TCKN resmi 11 haneli checksum algoritması (odd/even sum, d10, d11 ve 11111111111 koruması) eklendi
-- IBAN TR 26-karakter mod-97 algoritması (basamak basamak mod-97) eklendi
-- İKN format (YYYY/N...) ve e-posta doğrulama fonksiyonları eklendi
-- geçerli test örnekleri algoritmadan üretildi
-- ham Math. kullanımı 0 adet
-- 153 test %100 yeşil
+- text.email ve validate.email arasındaki tekrarlanan e-posta regex'i tekilleştirildi
+- validate.email(s) fonksiyonu e-posta biçim kontrolü için SSOT haline getirildi
+- text.email(raw) fonksiyonu geçerlilik kontrolü için validateEmail'i import edip çağıracak şekilde refactor edildi
+- ESLint boundaries kuralları korundu
+- text.email.valid ile validate.email tutarlılık testi eklendi
+- 154 test %100 yeşil
