@@ -1,8 +1,9 @@
-feat(abacus): date.format Türkçe tarih biçimlendirme eklendi
+feat(abacus): date relative ve gün aritmetiği eklendi
 
-- short/long/dayMonth/monthYear/period biçimleri eklendi
-- Türkçe ay adları sabit dizi olarak motor içine tanımlandı
-- Intl/toLocale kullanılmadan ISO string ayrıştırması sağlandı
-- short/period biçiminde sıfır dolgulu, long/dayMonth biçiminde sıfır dolgusuz gün ayrımı uygulandı
-- Geçersiz/boş girdilerde — dönüşü sağlandı
-- 85 test %100 yeşil
+- relative (bugün/dün/yarın/N gün önce-sonra) ifadeleri eklendi
+- daysBetween/daysUntil gün farkı fonksiyonları eklendi
+- dayName Türkçe gün kısaltması eklendi
+- Bugünün tarihi parametre olarak enjekte edilir (new Date() çağrılmaz)
+- UTC bazlı gün hesabı sağlandı
+- Geçersiz girdilerde —/null dönüş uygulandı
+- 92 test %100 yeşil

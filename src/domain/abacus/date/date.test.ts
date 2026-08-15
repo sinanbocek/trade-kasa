@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { format } from './index';
+import { dayName, daysBetween, daysUntil, format, relative } from './index';
 
 describe('ABACUS date.format motoru', () => {
   it('varsayılan short biçimi: GG.AA.YYYY (2026-08-15 -> 15.08.2026)', () => {
@@ -40,5 +40,53 @@ describe('ABACUS date.format motoru', () => {
     expect(format('')).toBe('—');
     expect(format('abc')).toBe('—');
     expect(format('2026-13-45')).toBe('—');
+  });
+});
+
+describe('ABACUS date relative & gün aritmetiği motoru', () => {
+  describe('daysBetween', () => {
+    it('iki tarih arası gün farkını hesaplar', () => {
+      expect(daysBetween('2026-08-10', '2026-08-15')).toBe(5);
+      expect(daysBetween('2026-08-15', '2026-08-10')).toBe(-5);
+      expect(daysBetween('2026-01-01', '2026-12-31')).toBe(364);
+    });
+
+    it('geçersiz girdilerde null döner', () => {
+      expect(daysBetween('abc', '2026-08-15')).toBeNull();
+      expect(daysBetween('2026-08-10', 'invalid')).toBeNull();
+    });
+  });
+
+  describe('daysUntil', () => {
+    it('bugünden hedefe gün farkını hesaplar', () => {
+      expect(daysUntil('2026-08-20', '2026-08-15')).toBe(5);
+      expect(daysUntil('2026-08-10', '2026-08-15')).toBe(-5);
+    });
+  });
+
+  describe('relative (Türkçe bağıl zaman)', () => {
+    it('bugün / dün / yarın ve gün önce/sonra ifadelerini döner', () => {
+      expect(relative('2026-08-15', '2026-08-15')).toBe('bugün');
+      expect(relative('2026-08-14', '2026-08-15')).toBe('dün');
+      expect(relative('2026-08-16', '2026-08-15')).toBe('yarın');
+      expect(relative('2026-08-12', '2026-08-15')).toBe('3 gün önce');
+      expect(relative('2026-08-18', '2026-08-15')).toBe('3 gün sonra');
+      expect(relative('2026-08-15T21:30:00Z', '2026-08-15')).toBe('bugün');
+    });
+
+    it('geçersiz girdilerde — döner', () => {
+      expect(relative('abc', '2026-08-15')).toBe('—');
+    });
+  });
+
+  describe('dayName (gün kısaltması)', () => {
+    it('gün kısaltmasını Türkçe döner', () => {
+      expect(dayName('2026-08-15')).toBe('Cts');
+      expect(dayName('2026-08-17')).toBe('Pzt');
+    });
+
+    it('geçersiz girdilerde — döner', () => {
+      expect(dayName('invalid')).toBe('—');
+    });
   });
 });

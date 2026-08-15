@@ -37,4 +37,9 @@
   - Gereksiz ondalık sıfır temizliği (`1,00M -> 1M`), 1.000 TL altı normal `format`'a düşme, negatif eksi öneki sağlandı.
   - TDD disipliniyle `money.test.ts` yazıldı (STUB ile 12 test kırmızı kanıtlandı).
   - `compact` ölçek-sınırı yuvarlama hatası (`₺1000K -> ₺1M`, `₺1000Mn -> ₺1Mr`) TDD ile çözüldü (3 test kırmızı kanıtlandı ve yeşile çevrildi).
-  - Vitest testleri (76 test) %100 YEŞİL geçti (`npx tsc --noEmit` 0 hata).
+- **Adım 2c/1 (ABACUS date.format Motoru)** tamamlandı:
+  - `date.format` Türkçe tarih biçimlendirme motoru (short/long/dayMonth/monthYear/period biçimleri) eklendi.
+  - Sabit Türkçe ay adları dizisi kullanıldı; `Intl`/`toLocale*` kullanılmadan manuel ISO ayrıştırması sağlandı.
+  - TDD disipliniyle `date.test.ts` yazıldı (STUB ile 9 test kırmızı kanıtlandı).
+  - ABACUS barrel export (`src/domain/abacus/index.ts`) üzerinden `date` dışa aktarıldı.
+  - Vitest testleri (85 test) %100 YEŞİL geçti (`npx tsc --noEmit` 0 hata).
