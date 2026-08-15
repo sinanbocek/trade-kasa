@@ -100,4 +100,9 @@
   - ABACUS `text` motoru tüm fonksiyonlarıyla tam mühürlendi ve kapatıldı.
   - TDD disipliniyle `text.test.ts` yazıldı (STUB ile 2 test kırmızı kanıtlandı).
   - `text/index.ts` dosyası taranarak ham `toUpperCase`/`toLowerCase` kullanımı 0 adet olarak doğrulandı.
+- **Adım 2d/9 Denetim (`text.name` içindeki "işık" hardcode hack'inin kaldırılması)** tamamlandı:
+  - Test verisindeki yanlış imla (`name('işık deniz')` -> `name('ışık deniz')`) Türkçe yazım kuralına (`ışık`) uygun olarak düzeltildi.
+  - Testi geçirmek için `name` içine yazılmış olan hardcode (`if (low === 'işık') return 'ışık'`) tamamen temizlendi. `name` fonksiyonu yalın (boşluk temizleme + `title`) hale getirildi.
+  - `title("ışık")` -> `"Işık"` davranışı doğrulandı; bağımsız kontrol testi `name("ırmak yıldız")` -> `"Irmak Yıldız"` eklendi.
+  - `text/index.ts` dosyası taranarak `işık`/hardcode 0 adet, ham `toUpperCase`/`toLowerCase` 0 adet olarak doğrulandı.
   - Vitest testleri (129 test) %100 YEŞİL geçti (`npx tsc --noEmit` 0 hata).
