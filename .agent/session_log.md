@@ -26,5 +26,10 @@
   - `money.format` fonksiyonu `math` motorunu (half-up yuvarlama & bölme) kullanarak yazıldı.
   - `math` motoruna `abs`, `floor` ve `mod` yardımcıları TDD ile eklendi; `money/index.ts` içerisindeki tüm ham `Math.*` çağrıları temizlendi.
   - ABACUS barrel export (`src/domain/abacus/index.ts`) üzerinden `money` dışa aktarıldı.
-  - Vitest testleri (33 test) %100 YEŞİL geçti (`npx tsc --noEmit` 0 hata).
-
+- **Adım 2b/2 (ABACUS money.toWords & text.numberToWords)** tamamlandı:
+  - `src/domain/abacus/text/index.ts` altında `numberToWords` motoru ("bir" düşme kuralı: 100->Yüz, 1000->Bin, 1000000->BirMilyon) eklendi.
+  - `money.toWords` tutar yazısı motoru (çek/sözleşme "Yalnız..." formatı) eklendi.
+  - TDD disipliniyle `text.test.ts` ve `money.test.ts` yazıldı (STUB ile 14 test kırmızı kanıtlandı).
+  - ABACUS barrel export (`src/domain/abacus/index.ts`) üzerinden `text` dışa aktarıldı.
+  - Türkçe sayı okuma ve kuruş kenar durumları (`101`, `1001`, `1000001`, `1001000`, `100100`, `2001`, `11000`, `1100000`, `103`, `1009`, `100000000000`) test süitine eklendi.
+  - Vitest testleri (58 test) %100 YEŞİL geçti (`npx tsc --noEmit` 0 hata).

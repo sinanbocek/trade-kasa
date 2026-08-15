@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { format } from './index';
+import { format, toWords } from './index';
 
 describe('ABACUS money.format motoru', () => {
   it('varsayılan biçim: simge solda, kuruşsuz (2323223 kuruş -> ₺23.232)', () => {
@@ -49,5 +49,59 @@ describe('ABACUS money.format motoru', () => {
 
   it('kuruşsuz gösterimde half-up yuvarlama (2323250 kuruş = 23.232,50 TL -> ₺23.233)', () => {
     expect(format(2323250)).toBe('₺23.233');
+  });
+});
+
+describe('ABACUS money.toWords motoru', () => {
+  it('32000000 kuruş -> Yalnız ÜçYüzYirmiBinTürkLirası', () => {
+    expect(toWords(32000000)).toBe('Yalnız ÜçYüzYirmiBinTürkLirası');
+  });
+
+  it('334533454 kuruş -> Yalnız ÜçMilyonÜçYüzKırkBeşBinÜçYüzOtuzDörtLiraElliDörtKuruş', () => {
+    expect(toWords(334533454)).toBe('Yalnız ÜçMilyonÜçYüzKırkBeşBinÜçYüzOtuzDörtLiraElliDörtKuruş');
+  });
+
+  it('100 kuruş -> Yalnız BirTürkLirası', () => {
+    expect(toWords(100)).toBe('Yalnız BirTürkLirası');
+  });
+
+  it('150 kuruş -> Yalnız BirLiraElliKuruş', () => {
+    expect(toWords(150)).toBe('Yalnız BirLiraElliKuruş');
+  });
+
+  it('0 kuruş -> Yalnız SıfırTürkLirası', () => {
+    expect(toWords(0)).toBe('Yalnız SıfırTürkLirası');
+  });
+
+  it('1 kuruş -> Yalnız SıfırLiraBirKuruş', () => {
+    expect(toWords(1)).toBe('Yalnız SıfırLiraBirKuruş');
+  });
+
+  it('spaced seçeneği ile boşluklu yazım üretir', () => {
+    expect(toWords(334533454, { spaced: true })).toBe('Yalnız Üç Milyon Üç Yüz Kırk Beş Bin Üç Yüz Otuz Dört Lira Elli Dört Kuruş');
+  });
+
+  describe('kuruş kenar durumları', () => {
+    it('103 kuruş -> Yalnız BirLiraÜçKuruş', () => {
+      expect(toWords(103)).toBe('Yalnız BirLiraÜçKuruş');
+    });
+
+    it('1009 kuruş -> Yalnız OnLiraDokuzKuruş', () => {
+      expect(toWords(1009)).toBe('Yalnız OnLiraDokuzKuruş');
+    });
+
+    it('100000000000 kuruş (1 milyar TL) -> Yalnız BirMilyarTürkLirası', () => {
+      expect(toWords(100000000000)).toBe('Yalnız BirMilyarTürkLirası');
+    });
+  });
+
+  describe('negatif tutar davranışı', () => {
+    it('-15000 kuruş -> -Yalnız YüzElliTürkLirası', () => {
+      expect(toWords(-15000)).toBe('-Yalnız YüzElliTürkLirası');
+    });
+
+    it('-15000 kuruş (spaced) -> -Yalnız Yüz Elli Türk Lirası', () => {
+      expect(toWords(-15000, { spaced: true })).toBe('-Yalnız Yüz Elli Türk Lirası');
+    });
   });
 });

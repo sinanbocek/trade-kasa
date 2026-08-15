@@ -1,9 +1,14 @@
 import { abs, div, floor, mod, round } from '../math';
+import { numberToWords } from '../text';
 
 export interface FormatMoneyOptions {
   kurus?: boolean;
   form?: 'symbol' | 'text';
   negative?: 'minus' | 'paren';
+}
+
+export interface ToWordsOptions {
+  spaced?: boolean;
 }
 
 /** Binlik ayraç ekleyici (Intl / toLocale kullanmadan) */
@@ -54,4 +59,37 @@ export function format(kurus: number | null | undefined, opts?: FormatMoneyOptio
   }
 
   return resultWithForm;
+}
+
+/**
+ * ABACUS tutar yazısı motoru (çek/sözleşme "Yalnız..." formatı, ABACUS-SPEC §3.2).
+ * Girdi kuruş bazlı tam sayıdır. Negatif girdilerde eksi işareti "Yalnız" ibaresinin önüne eklenir (-Yalnız ...).
+ */
+export function toWords(kurus: number, opts?: ToWordsOptions): string {
+  const spaced = opts?.spaced ?? false;
+  const joinStr = spaced ? ' ' : '';
+  const signPrefix = kurus < 0 ? '-' : '';
+
+  const absKurus = abs(kurus);
+  const tlDiv = div(absKurus, 100);
+  const lira = tlDiv !== null ? floor(tlDiv) : 0;
+  const kMod = mod(absKurus, 100);
+  const kurusPart = kMod !== null ? round(kMod, 0) : 0;
+
+  const prefix = `${signPrefix}Yalnız `;
+
+  if (lira === 0 && kurusPart === 0) {
+    const zeroTL = spaced ? 'Sıfır Türk Lirası' : 'SıfırTürkLirası';
+    return `${prefix}${zeroTL}`;
+  }
+
+  if (kurusPart === 0) {
+    const liraWords = numberToWords(lira, opts);
+    const tlSuffix = spaced ? 'Türk Lirası' : 'TürkLirası';
+    return `${prefix}${liraWords}${joinStr}${tlSuffix}`;
+  }
+
+  const liraWords = lira > 0 ? numberToWords(lira, opts) : 'Sıfır';
+  const kurusWords = numberToWords(kurusPart, opts);
+  return `${prefix}${liraWords}${joinStr}Lira${joinStr}${kurusWords}${joinStr}Kuruş`;
 }
