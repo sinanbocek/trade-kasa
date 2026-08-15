@@ -46,4 +46,9 @@
   - `relative` (bugün/dün/yarın/N gün önce-sonra), `daysBetween`, `daysUntil`, `dayName` (Pzt..Paz) fonksiyonları eklendi.
   - Bugün tarihi parametre olarak enjekte edildi (parametresiz `new Date()` kullanımı sıfırlandı).
   - TDD disipliniyle `date.test.ts` yazıldı (STUB ile 7 test kırmızı kanıtlandı).
-  - Vitest testleri (92 test) %100 YEŞİL geçti (`npx tsc --noEmit` 0 hata).
+- **Adım 2d/1 (ABACUS text Ek-Fonetiği Temel Yardımcıları)** tamamlandı:
+  - `lastVowel`, `isBackVowel`, `isRoundedVowel`, `endsWithHardConsonant`, `endsWithVowel` yardımcıları eklendi.
+  - Türkçe büyük-küçük ünlü uyumu ve fıstıkçı şahap sert ünsüz kuralları tanımlandı.
+  - Özel TR-duyarlı küçültme fonksiyonu `toTrLower` eklendi (ham `toLowerCase` kullanımı sıfırlandı).
+  - TDD disipliniyle `text.test.ts` yazıldı (STUB ile 5 test kırmızı kanıtlandı).
+  - Vitest testleri (98 test) %100 YEŞİL geçti (`npx tsc --noEmit` 0 hata).

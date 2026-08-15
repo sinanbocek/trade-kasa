@@ -6,6 +6,7 @@ import {
   isRoundedVowel,
   lastVowel,
   numberToWords,
+  toTrLower,
 } from './index';
 
 describe('ABACUS text.numberToWords motoru', () => {
@@ -81,6 +82,17 @@ describe('ABACUS text.numberToWords motoru', () => {
 });
 
 describe('ABACUS text ek-fonetiği temel yardımcıları', () => {
+  describe('toTrLower (Türkçe harf küçültme)', () => {
+    it('tam kelimeleri Türkçe kurallarına göre doğru küçültür', () => {
+      expect(toTrLower('İSTANBUL')).toBe('istanbul');
+      expect(toTrLower('IŞIK')).toBe('ışık');
+      expect(toTrLower('ÇAĞLAYAN')).toBe('çağlayan');
+      expect(toTrLower('GÜNÜMÜZ')).toBe('günümüz');
+      expect(toTrLower('ABC')).toBe('abc');
+      expect(toTrLower('İğne')).toBe('iğne');
+    });
+  });
+
   describe('lastVowel', () => {
     it('kelimedeki son ünlüyü döner', () => {
       expect(lastVowel('kırk')).toBe('ı');

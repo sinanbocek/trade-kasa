@@ -13,43 +13,37 @@ const BACK_VOWELS = ['a', 'ı', 'o', 'u'];
 const ROUNDED_VOWELS = ['o', 'ö', 'u', 'ü'];
 const HARD_CONSONANTS = ['f', 's', 't', 'k', 'ç', 'ş', 'h', 'p'];
 
+const TR_UPPER_TO_LOWER_MAP: Record<string, string> = {
+  'İ': 'i',
+  'I': 'ı',
+  'Ç': 'ç',
+  'Ğ': 'ğ',
+  'Ö': 'ö',
+  'Ş': 'ş',
+  'Ü': 'ü',
+  'Â': 'â',
+  'Î': 'î',
+  'Û': 'û',
+};
+
 /**
  * Türkçe harf küçültme yardımcısı (Intl / ham toLowerCase kullanılmaz).
- * 'İ' -> 'i' ve 'I' -> 'ı' dönüşümlerini doğru yapar.
+ * Harita öncelikli eşleme yapar; 'İ' -> 'i' ve 'I' -> 'ı' dönüşümlerinin ASCII dalına düşmesini engeller.
  */
 export function toTrLower(str: string): string {
+  if (!str) return '';
   let res = '';
   for (let i = 0; i < str.length; i++) {
     const ch = str[i];
-    switch (ch) {
-      case 'İ':
-        res += 'i';
-        break;
-      case 'I':
-        res += 'ı';
-        break;
-      case 'Ç':
-        res += 'ç';
-        break;
-      case 'Ğ':
-        res += 'ğ';
-        break;
-      case 'Ö':
-        res += 'ö';
-        break;
-      case 'Ş':
-        res += 'ş';
-        break;
-      case 'Ü':
-        res += 'ü';
-        break;
-      default:
-        if (ch && ch >= 'A' && ch <= 'Z') {
-          res += String.fromCharCode(ch.charCodeAt(0) + 32);
-        } else if (ch) {
-          res += ch;
-        }
-        break;
+    if (!ch) continue;
+
+    const mapped = TR_UPPER_TO_LOWER_MAP[ch];
+    if (mapped) {
+      res += mapped;
+    } else if (ch >= 'A' && ch <= 'Z') {
+      res += String.fromCharCode(ch.charCodeAt(0) + 32);
+    } else {
+      res += ch;
     }
   }
   return res;
