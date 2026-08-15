@@ -167,4 +167,29 @@ describe('ABACUS text.suffix ek çekimi motoru (loc, dat, abl)', () => {
     expect(suffix(2, 'percent', 'dat')).toBe("%2'ye");
     expect(suffix(1000000, 'number', 'dat')).toBe("1000000'a");
   });
+
+  it('money kind için ekleri daima lira okunuşuna göre üretir', () => {
+    expect(suffix(150000, 'money', 'loc')).toBe("₺1.500'da");
+    expect(suffix(150000, 'money', 'dat')).toBe("₺1.500'ya");
+    expect(suffix(150000, 'money', 'abl')).toBe("₺1.500'dan");
+    expect(suffix(0, 'money', 'loc')).toBe("0'da");
+  });
+
+  describe('ek kenar durumları (number)', () => {
+    it("5 -> 5'ten", () => {
+      expect(suffix(5, 'number', 'abl')).toBe("5'ten");
+    });
+
+    it("9 -> 9'da", () => {
+      expect(suffix(9, 'number', 'loc')).toBe("9'da");
+    });
+
+    it("80 -> 80'e", () => {
+      expect(suffix(80, 'number', 'dat')).toBe("80'e");
+    });
+
+    it("1000000 -> 1000000'da", () => {
+      expect(suffix(1000000, 'number', 'loc')).toBe("1000000'da");
+    });
+  });
 });

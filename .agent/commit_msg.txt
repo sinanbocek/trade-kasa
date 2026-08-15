@@ -1,9 +1,6 @@
-feat(abacus): text.suffix ek çekimi (bulunma/yönelme/çıkma) eklendi
+fix(abacus): text.suffix money kind lira okunuşuna göre düzeltildi
 
-- loc (-de/-da/-te/-ta), dat (-e/-a/-ye/-ya) ve abl (-den/-dan/-ten/-tan) hâlleri eklendi
-- Ek seçimi sayının okunuşunun (numberToWords spaced) son kelimesinin son sesine göre belirlendi
-- Ünlü uyumu, sert ünsüz sertleşmesi ve kaynaştırma y harfi kuralı uygulandı
-- Kesme işareti daima eklendi
-- number/money/percent/year kind türleri tanımlandı
-- Kenar durumları (100, 1000, 1000000) doğrulandı
-- 102 test %100 yeşil
+- money kind için ek okunuşu daima para birimi ("lira") son sesine göre üretildi (₺1.500'da, ₺1.500'ya, ₺1.500'dan)
+- money 3 hâl kanıt testleri ve number kenar durum testleri eklendi
+- number/year/percent ek çekimi korundu
+- 107 test %100 yeşil

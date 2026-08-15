@@ -180,29 +180,30 @@ export function endsWithVowel(word: string): boolean {
 
 /**
  * ABACUS Türkçe ek çekim motoru (ABACUS-SPEC §3.5-a).
- * Ek, sayının okunuşunun (numberToWords) son sesine göre belirlenir.
+ * Ek, sayının veya para biriminin (lira) okunuşunun son sesine göre belirlenir.
  * Kesme işareti (') daima eklenir.
  */
 export function suffix(value: number, kind: SuffixKind, hal: SuffixCase): string {
   let formattedValue = '';
+  let lastWord = '';
 
-  switch (kind) {
-    case 'year':
-    case 'number':
-      formattedValue = `${value}`;
-      break;
-    case 'percent':
-      formattedValue = `%${value}`;
-      break;
-    case 'money':
-      formattedValue = formatMoney(value);
-      break;
+  if (kind === 'money') {
+    formattedValue = formatMoney(value);
+    lastWord = 'lira';
+  } else {
+    switch (kind) {
+      case 'year':
+      case 'number':
+        formattedValue = `${value}`;
+        break;
+      case 'percent':
+        formattedValue = `%${value}`;
+        break;
+    }
+    const wordsText = numberToWords(value, { spaced: true });
+    const words = wordsText.split(' ');
+    lastWord = words[words.length - 1] ?? '';
   }
-
-  // Okunuşun son kelimesini spaced: true opsiyonuyla elde et
-  const wordsText = numberToWords(value, { spaced: true });
-  const words = wordsText.split(' ');
-  const lastWord = words[words.length - 1] ?? '';
 
   const lastV = lastVowel(lastWord);
   const back = isBackVowel(lastV ?? '');

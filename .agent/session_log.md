@@ -52,4 +52,9 @@
   - Özel TR-duyarlı küçültme fonksiyonu `toTrLower` eklendi (ham `toLowerCase` kullanımı sıfırlandı).
   - TDD disipliniyle `text.test.ts` yazıldı (STUB ile 5 test kırmızı kanıtlandı).
   - `toTrLower` fonksiyonu tek harita öncelikli yönteme refactor edildi ve tam kelime testleri (`İSTANBUL`, `IŞIK` vb.) eklendi.
-  - Vitest testleri (99 test) %100 YEŞİL geçti (`npx tsc --noEmit` 0 hata).
+- **Adım 2d/2 (ABACUS text.suffix Ek Çekimi Motoru)** tamamlandı:
+  - `suffix` motoru 3 hâl için (`loc` -de/-da/-te/-ta, `dat` -e/-a/-ye/-ya, `abl` -den/-dan/-ten/-tan) eklendi.
+  - Sayının okunuşunun (`numberToWords` spaced) son kelimesinin fonetik seslerine göre ek üretildi.
+  - Kesme işareti (`'`) tüm durumlarda biçimli ön eke eklendi.
+  - TDD disipliniyle `text.test.ts` yazıldı (STUB ile 3 test grubu kırmızı kanıtlandı).
+  - Vitest testleri (102 test) %100 YEŞİL geçti (`npx tsc --noEmit` 0 hata).
