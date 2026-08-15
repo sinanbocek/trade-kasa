@@ -119,3 +119,10 @@
   - Algoritmik olarak doğrulanmış geçerli örnekler (`vkn("1111111114")`, `tckn("10000000078")`, `iban("TR40 0006 2000 0000 0000 0000 01")`, `ikn("2026/1298071")`, `email("a@b.com")`) ile TDD disiplininde test edildi (STUB ile 5 test kırmızı kanıtlandı).
   - Barrel export (`src/domain/abacus/index.ts`) üzerinden `validate` dışa aktarıldı.
   - Vitest testleri (153 test) %100 YEŞİL geçti (`npx tsc --noEmit` 0 hata).
+- **Adım 2f Denetim (`email` doğrulama mantığının tekilleştirilmesi - DRY)** tamamlandı:
+  - `validate.email(s)` e-posta doğrulama için SSOT tek kaynak yapıldı.
+  - `text.email(raw)` fonksiyonundaki mükerrer e-posta regex'i kaldırıldı; `validateEmail` import edilerek tekilleştirildi.
+  - ESLint boundaries katman bağımlılığı doğrulandı (0 hata).
+  - `text.email.valid === validate.email` tutarlılık testi süite eklendi.
+  - Grep taramasında e-posta regex'inin (`^[^\s@]+@[^\s@]+\.[^\s@]+$`) tam 1 yerde geçtiği kanıtlandı.
+  - Vitest testleri (154 test) %100 YEŞİL geçti (`npx tsc --noEmit` 0 hata).

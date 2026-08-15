@@ -1,8 +1,8 @@
-refactor(abacus): email doğrulama tek kaynağa indirildi (DRY)
+feat(abacus): mask motoru (PII gizleme) eklendi
 
-- text.email ve validate.email arasındaki tekrarlanan e-posta regex'i tekilleştirildi
-- validate.email(s) fonksiyonu e-posta biçim kontrolü için SSOT haline getirildi
-- text.email(raw) fonksiyonu geçerlilik kontrolü için validateEmail'i import edip çağıracak şekilde refactor edildi
-- ESLint boundaries kuralları korundu
-- text.email.valid ile validate.email tutarlılık testi eklendi
-- 154 test %100 yeşil
+- money (sabit ****), vkn (123****890), iban (TR** **** **** **** **** **01), phone (+90 5** *** ** 67) maskeleme fonksiyonları eklendi
+- yalnız gösterim amaçlıdır; saklanan gerçek veri mutasyonuna uğramaz
+- geçersiz/eksik girdilerde "—" döner
+- ABACUS çekirdek motorları tamamlandı
+- ham Math./toLowerCase/toUpperCase kullanımı 0 adet
+- 163 test %100 yeşil
