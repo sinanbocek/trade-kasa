@@ -29,6 +29,22 @@ export function round(x: number, d = 0): number {
   return new Decimal(String(x)).toDecimalPlaces(d, Decimal.ROUND_HALF_UP).toNumber();
 }
 
+/** Mutlak değer hesabı */
+export function abs(x: number): number {
+  return new Decimal(String(x)).abs().toNumber();
+}
+
+/** Taban / aşağı yuvarlama */
+export function floor(x: number): number {
+  return new Decimal(String(x)).floor().toNumber();
+}
+
+/** Kalan / modülasyon hesabı (payda 0 ise null) */
+export function mod(a: number, b: number): number | null {
+  if (b === 0) return null;
+  return new Decimal(String(a)).mod(String(b)).toNumber();
+}
+
 /** Katsayı hesabı. Payda <= 0 ise null döner. */
 export function ratio(pay: number, payda: number): number | null {
   if (payda <= 0) return null;

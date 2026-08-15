@@ -19,5 +19,12 @@
   - STUB motor ile GERÇEK KIRMIZI test (17 failed assertion) kanıtlandı.
   - `String(x)` dönüşümü eklenerek `Decimal.js` binary float temsil kayıpları engellendi (`1.005 -> 1.01`, `2.675 -> 2.68`, `0.1 + 0.2 -> 0.3`).
   - ABACUS barrel export (`src/domain/abacus/index.ts`) üzerinden `math` dışa aktarıldı.
-  - Vitest testleri (17 test) %100 YEŞİL geçti (`npx tsc --noEmit` 0 hata).
+- **Adım 2b/1 (ABACUS money.format Motoru)** tamamlandı:
+  - TCMB kuralları (boşluksuz `₺` solda, `TL` sağda, `null` için `—`, `0` için `0`, half-up kuruşsuz yuvarlama) tanımlandı.
+  - TDD disipliniyle `src/domain/abacus/money/money.test.ts` yazıldı.
+  - STUB motor ile GERÇEK KIRMIZI test (12 failed assertion) kanıtlandı.
+  - `money.format` fonksiyonu `math` motorunu (half-up yuvarlama & bölme) kullanarak yazıldı.
+  - `math` motoruna `abs`, `floor` ve `mod` yardımcıları TDD ile eklendi; `money/index.ts` içerisindeki tüm ham `Math.*` çağrıları temizlendi.
+  - ABACUS barrel export (`src/domain/abacus/index.ts`) üzerinden `money` dışa aktarıldı.
+  - Vitest testleri (33 test) %100 YEŞİL geçti (`npx tsc --noEmit` 0 hata).
 

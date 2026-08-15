@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { add, sub, mul, div, round, ratio, percent } from './index';
+import { add, sub, mul, div, round, ratio, percent, abs, floor, mod } from './index';
 
 describe('ABACUS math motoru', () => {
   describe('add / sub / mul (temel aritmetik)', () => {
@@ -51,6 +51,32 @@ describe('ABACUS math motoru', () => {
       expect(round(1.005, 2)).toBe(1.01);
       expect(round(2.005, 2)).toBe(2.01);
       expect(round(2.675, 2)).toBe(2.68);
+    });
+  });
+
+  describe('abs (mutlak değer)', () => {
+    it('pozitif ve negatif sayıların mutlak değerini döner', () => {
+      expect(abs(2500)).toBe(2500);
+      expect(abs(-2500)).toBe(2500);
+      expect(abs(0)).toBe(0);
+    });
+  });
+
+  describe('floor (aşağı yuvarlama / taban)', () => {
+    it('taban değerini hesaplar', () => {
+      expect(floor(23.85)).toBe(23);
+      expect(floor(23232.23)).toBe(23232);
+    });
+  });
+
+  describe('mod (kalan / modülasyon)', () => {
+    it('kalan değerini hesaplar', () => {
+      expect(mod(2323223, 100)).toBe(23);
+      expect(mod(2323250, 100)).toBe(50);
+    });
+
+    it('payda 0 ise null döner', () => {
+      expect(mod(100, 0)).toBeNull();
     });
   });
 
