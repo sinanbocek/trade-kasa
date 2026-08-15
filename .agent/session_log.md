@@ -74,4 +74,8 @@
   - Hâl ekinin ünlü uyumu iyelikli formun son ünlüsüne göre belirlendi.
   - Pronominal-n ve ünsüz harfle biten iyeliklerden sonra loc/abl ekleri daima `-da/-de` ve `-dan/-den` olarak üretildi.
   - SPEC örneği (`%31'ine`), 3-hâl/5-hâl pronominal-n testleri ve tüm regresyon testleri doğrulandı.
-  - Vitest testleri (115 test) %100 YEŞİL geçti (`npx tsc --noEmit` 0 hata).
+- **Adım 2d/6 (ABACUS text.suffix Tam İyelik-Hâl Matrisi Kanıtı)** tamamlandı:
+  - benim/senin/bizim/sizin + acc & gen, onların tüm hâlleri, ince/yuvarlak ünlü çeşitliliği ve money/percent tam kombinasyon testleri eklendi.
+  - TDD ile ünlü ile biten kelimelerde tek ünsüzlü iyelik ekinden (`m`, `n`) sonra kök kelime ünlüsüne düşme kenar durumu (`suffix(150000, "money", {iyelik:"benim", hal:"dat"}) -> ₺1.500'ma`) kırmızı kanıtlandı ve `posLastV = lastVowel(posSuffix) ?? lastVowel(lastWord)` mantığı ile düzeltildi.
+  - ABACUS `text.suffix` motoru tam matriste %100 mühürlendi.
+  - Vitest testleri (119 test) %100 YEŞİL geçti (`npx tsc --noEmit` 0 hata).

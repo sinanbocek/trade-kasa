@@ -38,6 +38,22 @@ const TR_UPPER_TO_LOWER_MAP: Record<string, string> = {
   'Û': 'û',
 };
 
+const TR_LOWER_TO_UPPER_MAP: Record<string, string> = {
+  'i': 'İ',
+  'ı': 'I',
+  'ç': 'Ç',
+  'ğ': 'Ğ',
+  'ö': 'Ö',
+  'ş': 'Ş',
+  'ü': 'Ü',
+  'â': 'Â',
+  'î': 'Î',
+  'û': 'Û',
+};
+
+const LOWERCASE_EXCEPTIONS = new Set(['ve', 'ile', 'veya', 'ya', 'da', 'de']);
+const PRESERVED_ABBREVIATIONS = new Set(['TYC', 'A.Ş.', 'Ltd.Şti.', 'San.', 'Tic.']);
+
 /**
  * Türkçe harf küçültme yardımcısı (Intl / ham toLowerCase kullanılmaz).
  * Harita öncelikli eşleme yapar; 'İ' -> 'i' ve 'I' -> 'ı' dönüşümlerinin ASCII dalına düşmesini engeller.
@@ -59,6 +75,75 @@ export function toTrLower(str: string): string {
     }
   }
   return res;
+}
+
+/** Türkçe harf küçültme motoru (toTrLower takma adı, ABACUS-SPEC §3.5-c) */
+export const lower = toTrLower;
+
+/**
+ * Türkçe harf büyütme motoru (ABACUS-SPEC §3.5-c).
+ * i->İ, ı->I dönüşümlerini özel harita ile yapar (ham toUpperCase kullanılmaz).
+ */
+export function upper(str: string): string {
+  if (!str) return '';
+  let res = '';
+  for (let i = 0; i < str.length; i++) {
+    const ch = str[i];
+    if (!ch) continue;
+
+    const mapped = TR_LOWER_TO_UPPER_MAP[ch];
+    if (mapped) {
+      res += mapped;
+    } else if (ch >= 'a' && ch <= 'z') {
+      res += String.fromCharCode(ch.charCodeAt(0) - 32);
+    } else {
+      res += ch;
+    }
+  }
+  return res;
+}
+
+/**
+ * Türkçe başlık harf biçimlendirme motoru (ABACUS-SPEC §3.5-c).
+ * Kelimelerin ilk harflerini büyük, kalanlarını küçük yapar; istisna sözlüğü (ve/ile küçük, TYC/A.Ş. korunur) uygular.
+ */
+export function title(str: string): string {
+  if (!str) return '';
+  const words = str.split(' ');
+  const resWords: string[] = [];
+
+  for (let i = 0; i < words.length; i++) {
+    const word = words[i];
+    if (!word) {
+      resWords.push('');
+      continue;
+    }
+
+    // 1. Kısaltma kontrolü (eğer kelime orijinal haliyle ya da upper haliyle sözlükteyse)
+    if (PRESERVED_ABBREVIATIONS.has(word)) {
+      resWords.push(word);
+      continue;
+    }
+    const upWord = upper(word);
+    if (PRESERVED_ABBREVIATIONS.has(upWord)) {
+      resWords.push(upWord);
+      continue;
+    }
+
+    // 2. Bağlaç/edat kontrolü (ilk kelime DEĞİLSE ve küçük harf hali sözlükteyse)
+    const lowWord = toTrLower(word);
+    if (i > 0 && LOWERCASE_EXCEPTIONS.has(lowWord)) {
+      resWords.push(lowWord);
+      continue;
+    }
+
+    // 3. Normal Title Case: İlk harf upper, kalanlar lower
+    const firstChar = word[0] ?? '';
+    const rest = word.slice(1);
+    resWords.push(`${upper(firstChar)}${toTrLower(rest)}`);
+  }
+
+  return resWords.join(' ');
 }
 
 /**
@@ -146,9 +231,9 @@ export function numberToWords(n: number, opts?: NumberToWordsOptions): string {
 /** Kelimedeki son ünlüyü döner (a/e/ı/i/o/ö/u/ü). Bulunamazsa null. */
 export function lastVowel(word: string): string | null {
   if (!word) return null;
-  const lower = toTrLower(word);
-  for (let i = lower.length - 1; i >= 0; i--) {
-    const char = lower[i];
+  const lowerStr = toTrLower(word);
+  for (let i = lowerStr.length - 1; i >= 0; i--) {
+    const char = lowerStr[i];
     if (char && TR_VOWELS.includes(char)) {
       return char;
     }
@@ -159,15 +244,15 @@ export function lastVowel(word: string): string | null {
 /** Ünlünün kalın (a, ı, o, u) olup olmadığını kontrol eder. */
 export function isBackVowel(vowel: string): boolean {
   if (!vowel) return false;
-  const lower = toTrLower(vowel);
-  return BACK_VOWELS.includes(lower);
+  const lowerStr = toTrLower(vowel);
+  return BACK_VOWELS.includes(lowerStr);
 }
 
 /** Ünlünün yuvarlak (o, ö, u, ü) olup olmadığını kontrol eder. */
 export function isRoundedVowel(vowel: string): boolean {
   if (!vowel) return false;
-  const lower = toTrLower(vowel);
-  return ROUNDED_VOWELS.includes(lower);
+  const lowerStr = toTrLower(vowel);
+  return ROUNDED_VOWELS.includes(lowerStr);
 }
 
 /** Dört yönlü küçük ünlü uyumu yardımcısı (a/ı -> ı, e/i -> i, o/u -> u, ö/ü -> ü) */
@@ -185,16 +270,16 @@ function getHarmonyVowel(lastV: string | null): 'ı' | 'i' | 'u' | 'ü' {
 /** Kelimenin son harfinin sert ünsüz (f, s, t, k, ç, ş, h, p) olup olmadığını kontrol eder. */
 export function endsWithHardConsonant(word: string): boolean {
   if (!word) return false;
-  const lower = toTrLower(word);
-  const lastChar = lower[lower.length - 1];
+  const lowerStr = toTrLower(word);
+  const lastChar = lowerStr[lowerStr.length - 1];
   return lastChar ? HARD_CONSONANTS.includes(lastChar) : false;
 }
 
 /** Kelimenin son harfinin ünlü (a/e/ı/i/o/ö/u/ü) olup olmadığını kontrol eder. */
 export function endsWithVowel(word: string): boolean {
   if (!word) return false;
-  const lower = toTrLower(word);
-  const lastChar = lower[lower.length - 1];
+  const lowerStr = toTrLower(word);
+  const lastChar = lowerStr[lowerStr.length - 1];
   return lastChar ? TR_VOWELS.includes(lastChar) : false;
 }
 

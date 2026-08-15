@@ -5,9 +5,12 @@ import {
   isBackVowel,
   isRoundedVowel,
   lastVowel,
+  lower,
   numberToWords,
   suffix,
+  title,
   toTrLower,
+  upper,
 } from './index';
 
 describe('ABACUS text.numberToWords motoru', () => {
@@ -139,6 +142,37 @@ describe('ABACUS text ek-fonetiği temel yardımcıları', () => {
     it('son harfin ünlü olup olmadığını kontrol eder', () => {
       expect(endsWithVowel('altı')).toBe(true);
       expect(endsWithVowel('kırk')).toBe(false);
+    });
+  });
+});
+
+describe('ABACUS text.lower, upper, title Türkçe harf motoru', () => {
+  describe('lower', () => {
+    it('İSTANBUL ve IŞIK için Türkçe küçük harfe çevirir', () => {
+      expect(lower('İSTANBUL')).toBe('istanbul');
+      expect(lower('IŞIK')).toBe('ışık');
+    });
+  });
+
+  describe('upper', () => {
+    it('Türkçe i->İ, ı->I ve özel harf duyarlı büyük harfe çevirir', () => {
+      expect(upper('iğne')).toBe('İĞNE');
+      expect(upper('ışık')).toBe('IŞIK');
+      expect(upper('çağlayan')).toBe('ÇAĞLAYAN');
+      expect(upper('abc')).toBe('ABC');
+    });
+  });
+
+  describe('title', () => {
+    it('kelimelerin ilk harflerini büyük, kalanlarını küçük yapar (istisnalar ile)', () => {
+      expect(title('ahmet yılmaz')).toBe('Ahmet Yılmaz');
+      expect(title('AHMET YILMAZ')).toBe('Ahmet Yılmaz');
+      expect(title('iSTANBUL')).toBe('İstanbul');
+      expect(title('ışık deniz')).toBe('Işık Deniz');
+      expect(title('abc san ve tic')).toBe('Abc San ve Tic');
+      expect(title('ve abc')).toBe('Ve Abc');
+      expect(title('tyc grup')).toBe('TYC Grup');
+      expect(title('çelik metal')).toBe('Çelik Metal');
     });
   });
 });

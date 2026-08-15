@@ -1,7 +1,6 @@
-fix(abacus): text.suffix tam iyelik-hâl matrisi kanıtlandı ve ünlü düşme kenar durumu düzeltildi
+feat(abacus): text upper/lower/title Türkçe harf işlemleri eklendi
 
-- benim/senin/bizim/sizin acc ve gen hâl ekleri kanıtlandı
-- onların iyelik matrisinin tüm hâlleri (abl, acc, gen, loc) pronominal-n ile doğrulandı
-- İnce/yuvarlak ünlü çeşitliliği ve money/percent kombinasyonları mühürlendi
-- Ünlü ile biten kelimelerde tek ünsüzlü iyelik ekinden (m, n) sonra kök kelime ünlüsüne düşme kenar durumu (lira+m+dat -> ₺1.500'ma) düzeltildi
-- 119 test %100 yeşil
+- Türkçe harf küçültme (lower) toTrLower takma adı olarak dışa aktarıldı
+- Türkçe harf büyütme (upper) i->İ, ı->I ve özel harf eşlemesiyle eklendi (ham toUpperCase kullanılmadı)
+- Türkçe başlık harf (title) kelime baş harfi büyütme ve kısaltma/bağlaç istisna sözlüğü (ve/ile küçük, TYC/A.Ş. korunur) ile eklendi
+- 122 test %100 yeşil
