@@ -57,4 +57,5 @@
   - Sayının okunuşunun (`numberToWords` spaced) son kelimesinin fonetik seslerine göre ek üretildi.
   - Kesme işareti (`'`) tüm durumlarda biçimli ön eke eklendi.
   - TDD disipliniyle `text.test.ts` yazıldı (STUB ile 3 test grubu kırmızı kanıtlandı).
-  - Vitest testleri (102 test) %100 YEŞİL geçti (`npx tsc --noEmit` 0 hata).
+  - `suffix` motorunda `money` kind için okunuşun son kelimesi "lira" kabul edilerek ek daima "lira" ses kurallarına (`₺1.500'da`, `₺1.500'ya`, `₺1.500'dan`) göre düzeltildi (TDD ile 1 test kırmızı kanıtlandı ve yeşile çevrildi).
+  - Vitest testleri (107 test) %100 YEŞİL geçti (`npx tsc --noEmit` 0 hata).

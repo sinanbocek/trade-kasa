@@ -6,7 +6,7 @@ export interface NumberToWordsOptions {
 }
 
 export type SuffixKind = 'number' | 'money' | 'percent' | 'year';
-export type SuffixCase = 'loc' | 'dat' | 'abl';
+export type SuffixCase = 'loc' | 'dat' | 'abl' | 'acc' | 'gen';
 
 const ONES = ['', 'Bir', 'İki', 'Üç', 'Dört', 'Beş', 'Altı', 'Yedi', 'Sekiz', 'Dokuz'];
 const TENS = ['', 'On', 'Yirmi', 'Otuz', 'Kırk', 'Elli', 'Altmış', 'Yetmiş', 'Seksen', 'Doksan'];
@@ -162,6 +162,18 @@ export function isRoundedVowel(vowel: string): boolean {
   return ROUNDED_VOWELS.includes(lower);
 }
 
+/** Dört yönlü küçük ünlü uyumu yardımcısı (a/ı -> ı, e/i -> i, o/u -> u, ö/ü -> ü) */
+function getHarmonyVowel(lastV: string | null): 'ı' | 'i' | 'u' | 'ü' {
+  if (!lastV) return 'ı';
+  const back = isBackVowel(lastV);
+  const rounded = isRoundedVowel(lastV);
+
+  if (back && !rounded) return 'ı';
+  if (!back && !rounded) return 'i';
+  if (back && rounded) return 'u';
+  return 'ü';
+}
+
 /** Kelimenin son harfinin sert ünsüz (f, s, t, k, ç, ş, h, p) olup olmadığını kontrol eder. */
 export function endsWithHardConsonant(word: string): boolean {
   if (!word) return false;
@@ -234,6 +246,16 @@ export function suffix(value: number, kind: SuffixKind, hal: SuffixCase): string
         s = back ? 'a' : 'e';
       }
       break;
+    case 'acc': {
+      const hv = getHarmonyVowel(lastV);
+      s = vowelEnd ? `y${hv}` : hv;
+      break;
+    }
+    case 'gen': {
+      const hv = getHarmonyVowel(lastV);
+      s = vowelEnd ? `n${hv}n` : `${hv}n`;
+      break;
+    }
   }
 
   return `${formattedValue}'${s}`;

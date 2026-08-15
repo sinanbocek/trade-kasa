@@ -143,7 +143,7 @@ describe('ABACUS text ek-fonetiği temel yardımcıları', () => {
   });
 });
 
-describe('ABACUS text.suffix ek çekimi motoru (loc, dat, abl)', () => {
+describe('ABACUS text.suffix ek çekimi motoru (loc, dat, abl, acc, gen)', () => {
   it('loc (bulunma) eklerini doğru üretir (-de/-da/-te/-ta)', () => {
     expect(suffix(2026, 'year', 'loc')).toBe("2026'da");
     expect(suffix(2025, 'year', 'loc')).toBe("2025'te");
@@ -166,6 +166,28 @@ describe('ABACUS text.suffix ek çekimi motoru (loc, dat, abl)', () => {
     expect(suffix(3, 'number', 'dat')).toBe("3'e");
     expect(suffix(2, 'percent', 'dat')).toBe("%2'ye");
     expect(suffix(1000000, 'number', 'dat')).toBe("1000000'a");
+  });
+
+  it('acc (belirtme) eklerini doğru üretir (-i/-ı/-u/-ü ve -yi/-yı/-yu/-yü)', () => {
+    expect(suffix(3, 'number', 'acc')).toBe("3'ü");
+    expect(suffix(2, 'number', 'acc')).toBe("2'yi");
+    expect(suffix(40, 'number', 'acc')).toBe("40'ı");
+    expect(suffix(9, 'number', 'acc')).toBe("9'u");
+    expect(suffix(6, 'number', 'acc')).toBe("6'yı");
+    expect(suffix(100, 'number', 'acc')).toBe("100'ü");
+    expect(suffix(2026, 'year', 'acc')).toBe("2026'yı");
+    expect(suffix(150000, 'money', 'acc')).toBe("₺1.500'yı");
+    expect(suffix(2, 'percent', 'acc')).toBe("%2'yi");
+  });
+
+  it('gen (tamlama) eklerini doğru üretir (-in/-ın/-un/-ün ve -nin/-nın/-nun/-nün)', () => {
+    expect(suffix(3, 'number', 'gen')).toBe("3'ün");
+    expect(suffix(2, 'number', 'gen')).toBe("2'nin");
+    expect(suffix(40, 'number', 'gen')).toBe("40'ın");
+    expect(suffix(100, 'number', 'gen')).toBe("100'ün");
+    expect(suffix(1000000, 'number', 'gen')).toBe("1000000'un");
+    expect(suffix(2026, 'year', 'gen')).toBe("2026'nın");
+    expect(suffix(150000, 'money', 'gen')).toBe("₺1.500'nın");
   });
 
   it('money kind için ekleri daima lira okunuşuna göre üretir', () => {

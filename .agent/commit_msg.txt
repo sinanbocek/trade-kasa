@@ -1,6 +1,8 @@
-fix(abacus): text.suffix money kind lira okunuşuna göre düzeltildi
+feat(abacus): text.suffix belirtme ve tamlama hâlleri eklendi
 
-- money kind için ek okunuşu daima para birimi ("lira") son sesine göre üretildi (₺1.500'da, ₺1.500'ya, ₺1.500'dan)
-- money 3 hâl kanıt testleri ve number kenar durum testleri eklendi
-- number/year/percent ek çekimi korundu
-- 107 test %100 yeşil
+- acc (-i/-ı/-u/-ü) ve gen (-in/-ın/-un/-ün) hâlleri eklendi
+- Dört yönlü küçük ünlü uyumu (a/ı->ı, e/i->i, o/u->u, ö/ü->ü) uygulandı
+- Ünlü bitişinde kaynaştırma y (acc) ve n (gen) harfleri eklendi
+- Kenar durumları (100->ü/ün, 1000000->un, 2->yi/nin) doğrulandı
+- loc/dat/abl ek çekimleri aynen korundu
+- 109 test %100 yeşil
