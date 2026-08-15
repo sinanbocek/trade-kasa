@@ -13,3 +13,11 @@
   - Husky `pre-commit` hook'u yapılandırıldı (`npx tsc --noEmit`).
   - `noUncheckedIndexedAccess` kaynaklı 2 tip hatası (`Sparkline.tsx` ve `TradeTab.tsx`) null-guard kontrolleriyle giderildi.
   - `TradeTab.tsx` içerisindeki `!` (non-null assertion) ifadesi kaldırıldı; `lastHistoryEntry` değişkeni ile güvenli guard sağlandı (`npx tsc --noEmit` 0 hata).
+- **Adım 2a (ABACUS math Motoru)** tamamlandı:
+  - `decimal.js` paketi eklendi.
+  - TDD disipliniyle `src/domain/abacus/math/math.test.ts` yazıldı.
+  - STUB motor ile GERÇEK KIRMIZI test (17 failed assertion) kanıtlandı.
+  - `String(x)` dönüşümü eklenerek `Decimal.js` binary float temsil kayıpları engellendi (`1.005 -> 1.01`, `2.675 -> 2.68`, `0.1 + 0.2 -> 0.3`).
+  - ABACUS barrel export (`src/domain/abacus/index.ts`) üzerinden `math` dışa aktarıldı.
+  - Vitest testleri (17 test) %100 YEŞİL geçti (`npx tsc --noEmit` 0 hata).
+
