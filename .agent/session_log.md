@@ -32,4 +32,8 @@
   - TDD disipliniyle `text.test.ts` ve `money.test.ts` yazıldı (STUB ile 14 test kırmızı kanıtlandı).
   - ABACUS barrel export (`src/domain/abacus/index.ts`) üzerinden `text` dışa aktarıldı.
   - Türkçe sayı okuma ve kuruş kenar durumları (`101`, `1001`, `1000001`, `1001000`, `100100`, `2001`, `11000`, `1100000`, `103`, `1009`, `100000000000`) test süitine eklendi.
-  - Vitest testleri (58 test) %100 YEŞİL geçti (`npx tsc --noEmit` 0 hata).
+- **Adım 2b/3 (ABACUS money.compact Motoru)** tamamlandı:
+  - `money.compact` büyük tutar kısaltma motoru (K/M ve B/Mn/Mr stili seçenekleri) eklendi.
+  - Gereksiz ondalık sıfır temizliği (`1,00M -> 1M`), 1.000 TL altı normal `format`'a düşme, negatif eksi öneki sağlandı.
+  - TDD disipliniyle `money.test.ts` yazıldı (STUB ile 12 test kırmızı kanıtlandı).
+  - Vitest testleri (72 test) %100 YEŞİL geçti (`npx tsc --noEmit` 0 hata).

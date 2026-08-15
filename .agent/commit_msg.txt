@@ -1,8 +1,5 @@
-feat(abacus): money.compact büyük tutar kısaltması eklendi
+fix(abacus): compact ölçek-sınırı yuvarlama hatası düzeltildi
 
-- K/M ve B/Mn/Mr stili seçenekleri eklendi
-- Gereksiz ondalık sıfır temizliği sağlandı (1,00M -> 1M)
-- 1.000 TL altı tutarlarda standart format biçimine düşme sağlandı
-- Negatif tutarlarda eksi öneki (-₺1,23M) uygulandı
-- Sembol ve metin biçimi seçenekleri eklendi
-- 72 test %100 yeşil
+- Yuvarlama sonucu 1000 ve üzerine ulaşınca bir üst ölçeğe terfi mantığı eklendi (₺1000K yerine ₺1M, ₺1000Mn yerine ₺1Mr)
+- Ölçek sınırı yuvarlama testleri eklendi
+- 76 test %100 yeşil

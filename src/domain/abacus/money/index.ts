@@ -102,6 +102,7 @@ export function toWords(kurus: number, opts?: ToWordsOptions): string {
 /**
  * ABACUS büyük tutar kısaltma motoru (ABACUS-SPEC §3.2).
  * Girdi kuruş bazlı tam sayıdır. 1.000 TL altı standart format'a düşer.
+ * Yuvarlama sonucu >= 1000 olan durumlarda üst ölçeğe terfi mantığı barındırır.
  */
 export function compact(kurus: number | null | undefined, opts?: CompactMoneyOptions): string {
   if (kurus === null || kurus === undefined || !Number.isFinite(kurus)) {
@@ -140,7 +141,27 @@ export function compact(kurus: number | null | undefined, opts?: CompactMoneyOpt
     unit = style === 'K/M' ? 'K' : 'B';
   }
 
-  const roundedVal = round(scaledVal, 2);
+  let roundedVal = round(scaledVal, 2);
+
+  // Yuvarlama sonrası 1000 ve üzerine ulaşırsa üst ölçeğe terfi et
+  if (roundedVal >= 1000) {
+    if (unit === 'K' || unit === 'B') {
+      const promoted = div(roundedVal, 1000);
+      if (promoted !== null) {
+        scaledVal = promoted;
+        unit = style === 'K/M' ? 'M' : 'Mn';
+        roundedVal = round(scaledVal, 2);
+      }
+    } else if (unit === 'M' || unit === 'Mn') {
+      const promoted = div(roundedVal, 1000);
+      if (promoted !== null) {
+        scaledVal = promoted;
+        unit = style === 'K/M' ? 'B' : 'Mr';
+        roundedVal = round(scaledVal, 2);
+      }
+    }
+  }
+
   const numStr = String(roundedVal).replace('.', ',');
 
   const scaledWithUnit = `${numStr}${unit}`;

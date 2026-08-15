@@ -156,4 +156,22 @@ describe('ABACUS money.compact motoru', () => {
   it('123456789 kuruş (form: text) -> 1,23M TL', () => {
     expect(compact(123456789, { form: 'text' })).toBe('1,23M TL');
   });
+
+  describe('ölçek-sınırı yuvarlama vakaları', () => {
+    it('99999900 kuruş (999.999 TL) -> ₺1M (bin->milyon sınırı)', () => {
+      expect(compact(99999900)).toBe('₺1M');
+    });
+
+    it('99999990000 kuruş (999.999.900 TL) -> ₺1B (milyon->milyar sınırı K/M)', () => {
+      expect(compact(99999990000)).toBe('₺1B');
+    });
+
+    it('99999990000 kuruş (B/Mn/Mr stili) -> ₺1Mr', () => {
+      expect(compact(99999990000, { style: 'B/Mn/Mr' })).toBe('₺1Mr');
+    });
+
+    it('99990000 kuruş (999.900 TL) -> ₺999,9K (bu ölçek atlamamalı)', () => {
+      expect(compact(99990000)).toBe('₺999,9K');
+    });
+  });
 });
