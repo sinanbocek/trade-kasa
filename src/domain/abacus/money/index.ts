@@ -11,6 +11,11 @@ export interface ToWordsOptions {
   spaced?: boolean;
 }
 
+export interface CompactMoneyOptions {
+  style?: 'K/M' | 'B/Mn/Mr';
+  form?: 'symbol' | 'text';
+}
+
 /** Binlik ayraç ekleyici (Intl / toLocale kullanmadan) */
 function groupThousands(n: number): string {
   return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, '.');
@@ -92,4 +97,54 @@ export function toWords(kurus: number, opts?: ToWordsOptions): string {
   const liraWords = lira > 0 ? numberToWords(lira, opts) : 'Sıfır';
   const kurusWords = numberToWords(kurusPart, opts);
   return `${prefix}${liraWords}${joinStr}Lira${joinStr}${kurusWords}${joinStr}Kuruş`;
+}
+
+/**
+ * ABACUS büyük tutar kısaltma motoru (ABACUS-SPEC §3.2).
+ * Girdi kuruş bazlı tam sayıdır. 1.000 TL altı standart format'a düşer.
+ */
+export function compact(kurus: number | null | undefined, opts?: CompactMoneyOptions): string {
+  if (kurus === null || kurus === undefined || !Number.isFinite(kurus)) {
+    return '—';
+  }
+
+  if (kurus === 0) {
+    return '0';
+  }
+
+  const style = opts?.style ?? 'K/M';
+  const form = opts?.form ?? 'symbol';
+
+  const isNegative = kurus < 0;
+  const absKurus = abs(kurus);
+  const tlValue = div(absKurus, 100);
+
+  if (tlValue === null) return '—';
+
+  // 1.000 TL altı kısaltmasız standart biçime düşer
+  if (tlValue < 1000) {
+    return format(kurus, { form, kurus: false });
+  }
+
+  let scaledVal = 0;
+  let unit = '';
+
+  if (tlValue >= 1000000000) {
+    scaledVal = div(tlValue, 1000000000) ?? 0;
+    unit = style === 'K/M' ? 'B' : 'Mr';
+  } else if (tlValue >= 1000000) {
+    scaledVal = div(tlValue, 1000000) ?? 0;
+    unit = style === 'K/M' ? 'M' : 'Mn';
+  } else {
+    scaledVal = div(tlValue, 1000) ?? 0;
+    unit = style === 'K/M' ? 'K' : 'B';
+  }
+
+  const roundedVal = round(scaledVal, 2);
+  const numStr = String(roundedVal).replace('.', ',');
+
+  const scaledWithUnit = `${numStr}${unit}`;
+  const resultWithForm = form === 'symbol' ? `₺${scaledWithUnit}` : `${scaledWithUnit} TL`;
+
+  return isNegative ? `-${resultWithForm}` : resultWithForm;
 }

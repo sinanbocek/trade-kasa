@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { format, toWords } from './index';
+import { compact, format, toWords } from './index';
 
 describe('ABACUS money.format motoru', () => {
   it('varsayılan biçim: simge solda, kuruşsuz (2323223 kuruş -> ₺23.232)', () => {
@@ -103,5 +103,57 @@ describe('ABACUS money.toWords motoru', () => {
     it('-15000 kuruş (spaced) -> -Yalnız Yüz Elli Türk Lirası', () => {
       expect(toWords(-15000, { spaced: true })).toBe('-Yalnız Yüz Elli Türk Lirası');
     });
+  });
+});
+
+describe('ABACUS money.compact motoru', () => {
+  it('123456789 kuruş (1.234.567,89 TL) -> ₺1,23M', () => {
+    expect(compact(123456789)).toBe('₺1,23M');
+  });
+
+  it('123456789 kuruş (B/Mn/Mr stili) -> ₺1,23Mn', () => {
+    expect(compact(123456789, { style: 'B/Mn/Mr' })).toBe('₺1,23Mn');
+  });
+
+  it('100000000 kuruş (tam 1 milyon TL) -> ₺1M (gereksiz sıfır yok)', () => {
+    expect(compact(100000000)).toBe('₺1M');
+  });
+
+  it('150000000 kuruş (1.5 milyon TL) -> ₺1,5M', () => {
+    expect(compact(150000000)).toBe('₺1,5M');
+  });
+
+  it('1234500 kuruş (12.345 TL) -> ₺12,35K', () => {
+    expect(compact(1234500)).toBe('₺12,35K');
+  });
+
+  it('1234500 kuruş (B/Mn/Mr stili) -> ₺12,35B', () => {
+    expect(compact(1234500, { style: 'B/Mn/Mr' })).toBe('₺12,35B');
+  });
+
+  it('100000000000 kuruş (1 milyar TL) -> ₺1B (K/M) / ₺1Mr (B/Mn/Mr)', () => {
+    expect(compact(100000000000)).toBe('₺1B');
+    expect(compact(100000000000, { style: 'B/Mn/Mr' })).toBe('₺1Mr');
+  });
+
+  it('50000 kuruş (500 TL < 1000 TL eşiği) -> ₺500 (normal format)', () => {
+    expect(compact(50000)).toBe('₺500');
+  });
+
+  it('-123456789 kuruş -> -₺1,23M', () => {
+    expect(compact(-123456789)).toBe('-₺1,23M');
+  });
+
+  it('0 kuruş -> 0', () => {
+    expect(compact(0)).toBe('0');
+  });
+
+  it('null/undefined -> —', () => {
+    expect(compact(null)).toBe('—');
+    expect(compact(undefined)).toBe('—');
+  });
+
+  it('123456789 kuruş (form: text) -> 1,23M TL', () => {
+    expect(compact(123456789, { form: 'text' })).toBe('1,23M TL');
   });
 });
