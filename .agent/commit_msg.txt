@@ -1,8 +1,7 @@
-feat(abacus): text.suffix belirtme ve tamlama hâlleri eklendi
+feat(abacus): text.suffix iyelik ekleri (yalın hâl) eklendi
 
-- acc (-i/-ı/-u/-ü) ve gen (-in/-ın/-un/-ün) hâlleri eklendi
-- Dört yönlü küçük ünlü uyumu (a/ı->ı, e/i->i, o/u->u, ö/ü->ü) uygulandı
-- Ünlü bitişinde kaynaştırma y (acc) ve n (gen) harfleri eklendi
-- Kenar durumları (100->ü/ün, 1000000->un, 2->yi/nin) doğrulandı
-- loc/dat/abl ek çekimleri aynen korundu
-- 109 test %100 yeşil
+- 6 iyelik kişisi (benim/senin/onun/bizim/sizin/onların) tanımlandı
+- SuffixArg imzası geriye uyumlu olacak şekilde obje veya string kabul eder hale getirildi
+- Dört yönlü küçük ünlü uyumu ve ünlü/ünsüz sonrası kaynaştırma kuralları uygulandı
+- String argüman kullanan mevcut 109 test ve regresyon testleri korundu
+- 111 test %100 yeşil

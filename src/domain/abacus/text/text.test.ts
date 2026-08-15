@@ -214,4 +214,31 @@ describe('ABACUS text.suffix ek çekimi motoru (loc, dat, abl, acc, gen)', () =>
       expect(suffix(1000000, 'number', 'loc')).toBe("1000000'da");
     });
   });
+
+  describe('iyelik ekleri (yalın hâl)', () => {
+    it('6 iyelik kişisini doğru üretir (benim/senin/onun/bizim/sizin/onların)', () => {
+      expect(suffix(3, 'number', { iyelik: 'onun' })).toBe("3'ü");
+      expect(suffix(2, 'number', { iyelik: 'onun' })).toBe("2'si");
+      expect(suffix(40, 'number', { iyelik: 'onun' })).toBe("40'ı");
+      expect(suffix(6, 'number', { iyelik: 'onun' })).toBe("6'sı");
+      expect(suffix(3, 'number', { iyelik: 'benim' })).toBe("3'üm");
+      expect(suffix(2, 'number', { iyelik: 'benim' })).toBe("2'm");
+      expect(suffix(40, 'number', { iyelik: 'senin' })).toBe("40'ın");
+      expect(suffix(2, 'number', { iyelik: 'senin' })).toBe("2'n");
+      expect(suffix(40, 'number', { iyelik: 'bizim' })).toBe("40'ımız");
+      expect(suffix(2, 'number', { iyelik: 'bizim' })).toBe("2'miz");
+      expect(suffix(40, 'number', { iyelik: 'sizin' })).toBe("40'ınız");
+      expect(suffix(40, 'number', { iyelik: 'onların' })).toBe("40'ları");
+      expect(suffix(3, 'number', { iyelik: 'onların' })).toBe("3'leri");
+      expect(suffix(150000, 'money', { iyelik: 'onun' })).toBe("₺1.500'sı");
+      expect(suffix(2, 'percent', { iyelik: 'onun' })).toBe("%2'si");
+      expect(suffix(100, 'number', { iyelik: 'onun' })).toBe("100'ü");
+      expect(suffix(100, 'number', { iyelik: 'benim' })).toBe("100'üm");
+      expect(suffix(1000, 'number', { iyelik: 'onun' })).toBe("1000'i");
+    });
+
+    it('regresyon: string argüman hâlâ doğru çalışır', () => {
+      expect(suffix(40, 'number', 'loc')).toBe("40'ta");
+    });
+  });
 });

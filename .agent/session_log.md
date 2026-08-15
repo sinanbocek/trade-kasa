@@ -58,4 +58,9 @@
   - Kesme işareti (`'`) tüm durumlarda biçimli ön eke eklendi.
   - TDD disipliniyle `text.test.ts` yazıldı (STUB ile 3 test grubu kırmızı kanıtlandı).
   - `suffix` motorunda `money` kind için okunuşun son kelimesi "lira" kabul edilerek ek daima "lira" ses kurallarına (`₺1.500'da`, `₺1.500'ya`, `₺1.500'dan`) göre düzeltildi (TDD ile 1 test kırmızı kanıtlandı ve yeşile çevrildi).
-  - Vitest testleri (107 test) %100 YEŞİL geçti (`npx tsc --noEmit` 0 hata).
+- **Adım 2d/3 (ABACUS text.suffix Belirtme ve Tamlama Hâlleri)** tamamlandı:
+  - `suffix` motoruna `acc` (belirtme -i/-ı/-u/-ü, -yi/-yı/-yu/-yü) ve `gen` (tamlama -in/-ın/-un/-ün, -nin/-nın/-nun/-nün) hâlleri eklendi.
+  - Dört yönlü küçük ünlü uyumu (`getHarmonyVowel`: a/ı->ı, e/i->i, o/u->u, ö/ü->ü) uygulandı.
+  - Ünlü bitişinde kaynaştırma `y` (acc) ve `n` (gen) harfleri tanımlandı.
+  - TDD disipliniyle `text.test.ts` yazıldı (STUB ile 2 test grubu kırmızı kanıtlandı).
+  - Vitest testleri (109 test) %100 YEŞİL geçti (`npx tsc --noEmit` 0 hata).

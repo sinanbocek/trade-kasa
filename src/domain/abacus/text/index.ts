@@ -7,6 +7,14 @@ export interface NumberToWordsOptions {
 
 export type SuffixKind = 'number' | 'money' | 'percent' | 'year';
 export type SuffixCase = 'loc' | 'dat' | 'abl' | 'acc' | 'gen';
+export type Iyelik = 'benim' | 'senin' | 'onun' | 'bizim' | 'sizin' | 'onların';
+
+export interface SuffixOptions {
+  hal?: SuffixCase;
+  iyelik?: Iyelik;
+}
+
+export type SuffixArg = SuffixCase | SuffixOptions;
 
 const ONES = ['', 'Bir', 'İki', 'Üç', 'Dört', 'Beş', 'Altı', 'Yedi', 'Sekiz', 'Dokuz'];
 const TENS = ['', 'On', 'Yirmi', 'Otuz', 'Kırk', 'Elli', 'Altmış', 'Yetmiş', 'Seksen', 'Doksan'];
@@ -195,7 +203,7 @@ export function endsWithVowel(word: string): boolean {
  * Ek, sayının veya para biriminin (lira) okunuşunun son sesine göre belirlenir.
  * Kesme işareti (') daima eklenir.
  */
-export function suffix(value: number, kind: SuffixKind, hal: SuffixCase): string {
+export function suffix(value: number, kind: SuffixKind, arg: SuffixArg): string {
   let formattedValue = '';
   let lastWord = '';
 
@@ -222,39 +230,65 @@ export function suffix(value: number, kind: SuffixKind, hal: SuffixCase): string
   const hard = endsWithHardConsonant(lastWord);
   const vowelEnd = endsWithVowel(lastWord);
 
+  const opts: SuffixOptions = typeof arg === 'string' ? { hal: arg } : arg;
+
   let s = '';
 
-  switch (hal) {
-    case 'loc':
-      if (hard) {
-        s = back ? 'ta' : 'te';
-      } else {
-        s = back ? 'da' : 'de';
-      }
-      break;
-    case 'abl':
-      if (hard) {
-        s = back ? 'tan' : 'ten';
-      } else {
-        s = back ? 'dan' : 'den';
-      }
-      break;
-    case 'dat':
-      if (vowelEnd) {
-        s = back ? 'ya' : 'ye';
-      } else {
-        s = back ? 'a' : 'e';
-      }
-      break;
-    case 'acc': {
-      const hv = getHarmonyVowel(lastV);
-      s = vowelEnd ? `y${hv}` : hv;
-      break;
+  if (opts.iyelik) {
+    const hv = getHarmonyVowel(lastV);
+    switch (opts.iyelik) {
+      case 'benim':
+        s = vowelEnd ? 'm' : `${hv}m`;
+        break;
+      case 'senin':
+        s = vowelEnd ? 'n' : `${hv}n`;
+        break;
+      case 'onun':
+        s = vowelEnd ? `s${hv}` : hv;
+        break;
+      case 'bizim':
+        s = vowelEnd ? `m${hv}z` : `${hv}m${hv}z`;
+        break;
+      case 'sizin':
+        s = vowelEnd ? `n${hv}z` : `${hv}n${hv}z`;
+        break;
+      case 'onların':
+        s = back ? 'ları' : 'leri';
+        break;
     }
-    case 'gen': {
-      const hv = getHarmonyVowel(lastV);
-      s = vowelEnd ? `n${hv}n` : `${hv}n`;
-      break;
+  } else if (opts.hal) {
+    switch (opts.hal) {
+      case 'loc':
+        if (hard) {
+          s = back ? 'ta' : 'te';
+        } else {
+          s = back ? 'da' : 'de';
+        }
+        break;
+      case 'abl':
+        if (hard) {
+          s = back ? 'tan' : 'ten';
+        } else {
+          s = back ? 'dan' : 'den';
+        }
+        break;
+      case 'dat':
+        if (vowelEnd) {
+          s = back ? 'ya' : 'ye';
+        } else {
+          s = back ? 'a' : 'e';
+        }
+        break;
+      case 'acc': {
+        const hv = getHarmonyVowel(lastV);
+        s = vowelEnd ? `y${hv}` : hv;
+        break;
+      }
+      case 'gen': {
+        const hv = getHarmonyVowel(lastV);
+        s = vowelEnd ? `n${hv}n` : `${hv}n`;
+        break;
+      }
     }
   }
 
