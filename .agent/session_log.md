@@ -162,3 +162,8 @@
   - `npx tsc --noEmit` çalıştırıldı (0 hata); tip güvenliğinin korunduğu kanıtlandı.
   - `.agent/commit_msg.txt` geçici commit mesaj dosyası `.gitignore`'a eklendi ve git indeksinden untrack edildi.
   - Vitest testleri (168 test) %100 YEŞİL geçti; working tree `nothing to commit` seviyesinde temizlendi.
+- **Adım 3b (ABACUS trading/position.ts Pozisyon Miktar/Hacim/Kaldıraç Motoru)** tamamlandı:
+  - `src/domain/abacus/trading/position.ts` motoru Kırmızı-Önce TDD disipliniyle eklendi (STUB ile 5 test kırmızı kanıtlandı).
+  - `volumeFromQty` (kuruş int hacim hesabı), `qtyFromVolume` (kesirli/tam sayı miktar hesabı + payda 0 sentinel guard'ı), `leverage` (fiili kaldıraç katı, teminat <= 0 için null) fonksiyonları yazıldı.
+  - `math.mul`, `math.div`, `math.floor` kullanıldı; ham `Math.*` kod kullanımı 0.
+  - 7 yeni birim test eklendi; Vitest testleri (175 test) %100 YEŞİL geçti (`npx tsc --noEmit` 0 hata).
