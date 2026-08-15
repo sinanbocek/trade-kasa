@@ -93,3 +93,11 @@
   - TDD disipliniyle `text.test.ts` yazıldı (STUB ile 5 test kırmızı kanıtlandı). `toAsciiLower` eklenerek ASCII e-posta küçültme davranışı netleştirildi.
   - `text/index.ts` dosyası taranarak ham `toUpperCase`/`toLowerCase` kullanımı 0 adet olarak doğrulandı.
   - Vitest testleri (127 test) %100 YEŞİL geçti (`npx tsc --noEmit` 0 hata).
+- **Adım 2d/9 (ABACUS text.name ve company Normalizasyonu — Text Motoru Kapanışı)** tamamlandı:
+  - `name` kişi adı normalizasyonu (`title` + fazla boşluk temizleme) eklendi.
+  - `company` firma unvanı normalizasyonu standart kısaltma sözlüğü (`San.`, `Tic.`, `Ltd.Şti.`, `A.Ş.`, `İth.`, `İhr.`, `İnş.`, `Paz.`) ve çok-kelimeli örüntü eşleşmesi (`anonim şirketi` -> `A.Ş.`, `limited şirketi` -> `Ltd.Şti.`) ile eklendi.
+  - `NormalizeResult` yapısı (`stored`, `display`, `raw`, `valid`) "düzelt ama aslını sakla" prensibiyle tüm metin normalizasyonlarında standartlaştırıldı.
+  - ABACUS `text` motoru tüm fonksiyonlarıyla tam mühürlendi ve kapatıldı.
+  - TDD disipliniyle `text.test.ts` yazıldı (STUB ile 2 test kırmızı kanıtlandı).
+  - `text/index.ts` dosyası taranarak ham `toUpperCase`/`toLowerCase` kullanımı 0 adet olarak doğrulandı.
+  - Vitest testleri (129 test) %100 YEŞİL geçti (`npx tsc --noEmit` 0 hata).

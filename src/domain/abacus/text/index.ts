@@ -61,6 +61,37 @@ const TR_LOWER_TO_UPPER_MAP: Record<string, string> = {
 const LOWERCASE_EXCEPTIONS = new Set(['ve', 'ile', 'veya', 'ya', 'da', 'de']);
 const PRESERVED_ABBREVIATIONS = new Set(['TYC', 'A.Ş.', 'Ltd.Şti.', 'San.', 'Tic.']);
 
+const MULTI_WORD_COMPANY_MAP: Record<string, string> = {
+  'anonim şirketi': 'A.Ş.',
+  'limited şirketi': 'Ltd.Şti.',
+  'ltd şti': 'Ltd.Şti.',
+  'ltd. şti': 'Ltd.Şti.',
+  'ltd. şti.': 'Ltd.Şti.',
+};
+
+const SINGLE_WORD_COMPANY_MAP: Record<string, string> = {
+  'a.ş.': 'A.Ş.',
+  'a.ş': 'A.Ş.',
+  'aş': 'A.Ş.',
+  'ltd.şti.': 'Ltd.Şti.',
+  'ltd.şti': 'Ltd.Şti.',
+  'san.': 'San.',
+  'san': 'San.',
+  'sanayi': 'San.',
+  'tic.': 'Tic.',
+  'tic': 'Tic.',
+  'ticaret': 'Tic.',
+  'ith.': 'İth.',
+  'ithalat': 'İth.',
+  'ihr.': 'İhr.',
+  'ihracat': 'İhr.',
+  'inş.': 'İnş.',
+  'inşaat': 'İnş.',
+  'paz.': 'Paz.',
+  'pazarlama': 'Paz.',
+  've': 've',
+};
+
 /**
  * ASCII harf küçültme yardımcısı (E-posta ve Web normalizasyonu için).
  * 'I' harfini Türkçe 'ı' yerine ASCII 'i' yapar.
@@ -271,12 +302,65 @@ export function websiteUrl(raw: string): string {
 
 /** Kişi adı normalizasyonu (ABACUS-SPEC §3.5-e) */
 export function name(raw: string): NormalizeResult {
-  return { stored: '', display: '', raw: raw ?? '', valid: false }; // STUB
+  if (!raw) return { stored: '', display: '', raw: raw ?? '', valid: false };
+
+  const cleaned = raw.replace(/\s+/g, ' ').trim();
+  if (!cleaned) return { stored: '', display: '', raw, valid: false };
+
+  const titled = title(cleaned);
+  return { stored: titled, display: titled, raw, valid: true };
 }
 
 /** Firma unvanı normalizasyonu (ABACUS-SPEC §3.5-e) */
 export function company(raw: string): NormalizeResult {
-  return { stored: '', display: '', raw: raw ?? '', valid: false }; // STUB
+  if (!raw) return { stored: '', display: '', raw: raw ?? '', valid: false };
+
+  const cleaned = raw.replace(/\s+/g, ' ').trim();
+  if (!cleaned) return { stored: '', display: '', raw, valid: false };
+
+  const words = cleaned.split(' ');
+  const resWords: string[] = [];
+
+  let i = 0;
+  while (i < words.length) {
+    const currentWord = words[i];
+    if (!currentWord) {
+      i++;
+      continue;
+    }
+
+    // Çok-kelimeli kısaltma kontrolü (2 kelime)
+    if (i + 1 < words.length) {
+      const nextWord = words[i + 1] ?? '';
+      const pairKey = toTrLower(`${currentWord} ${nextWord}`);
+      const multiMatch = MULTI_WORD_COMPANY_MAP[pairKey];
+      if (multiMatch) {
+        resWords.push(multiMatch);
+        i += 2;
+        continue;
+      }
+    }
+
+    // Tek-kelimeli kısaltma kontrolü
+    const singleKey = toTrLower(currentWord);
+    const singleMatch = SINGLE_WORD_COMPANY_MAP[singleKey];
+    if (singleMatch) {
+      if (singleKey === 've') {
+        resWords.push(resWords.length === 0 ? 'Ve' : 've');
+      } else {
+        resWords.push(singleMatch);
+      }
+      i++;
+      continue;
+    }
+
+    // Normal kelime -> title casing
+    resWords.push(title(currentWord));
+    i++;
+  }
+
+  const resultStr = resWords.join(' ');
+  return { stored: resultStr, display: resultStr, raw, valid: true };
 }
 
 /**

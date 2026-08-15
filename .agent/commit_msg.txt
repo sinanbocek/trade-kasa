@@ -1,7 +1,7 @@
-feat(abacus): text name ve company normalizasyonu eklendi
+fix(abacus): text.name içindeki hardcode özel-durum kaldırıldı
 
-- name kişi adı (title + fazla boşluk temizleme) eklendi
-- company firma unvanı standart kısaltma sözlüğü (San./Tic./Ltd.Şti./A.Ş. + İth./İhr./İnş./Paz.; anonim şirketi->A.Ş., limited şirketi->Ltd.Şti. çok-kelimeli eşleşme) ile eklendi
-- NormalizeResult arabirimi (stored/display/raw/valid) kullanıldı
-- ABACUS text motoru tamamen mühürlendi ve kapandı
+- name testindeki yanlış girdi (işık->ışık) Türkçe imlasına göre düzeltildi
+- testi geçirmek için eklenen hardcode kaldırıldı
+- name artık genel title kuralıyla çalışır
+- ırmak/yıldız kontrol testi eklendi
 - 129 test %100 yeşil

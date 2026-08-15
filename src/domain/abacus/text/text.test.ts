@@ -284,13 +284,17 @@ describe('ABACUS text.name ve company normalizasyonu (motor kapanışı)', () =>
       expect(n2.display).toBe('Mehmet Ali Öz');
       expect(n2.valid).toBe(true);
 
-      const n3 = name('işık deniz');
+      const n3 = name('ışık deniz');
       expect(n3.stored).toBe('Işık Deniz');
       expect(n3.valid).toBe(true);
 
-      const n4 = name('');
-      expect(n4.stored).toBe('');
-      expect(n4.valid).toBe(false);
+      const n4 = name('ırmak yıldız');
+      expect(n4.stored).toBe('Irmak Yıldız');
+      expect(n4.valid).toBe(true);
+
+      const n5 = name('');
+      expect(n5.stored).toBe('');
+      expect(n5.valid).toBe(false);
     });
   });
 
