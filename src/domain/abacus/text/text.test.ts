@@ -1,16 +1,22 @@
 import { describe, expect, it } from 'vitest';
 import {
+  email,
   endsWithHardConsonant,
   endsWithVowel,
   isBackVowel,
   isRoundedVowel,
+  join,
   lastVowel,
   lower,
   numberToWords,
+  phone,
   suffix,
   title,
   toTrLower,
   upper,
+  website,
+  websiteUrl,
+  whatsapp,
 } from './index';
 
 describe('ABACUS text.numberToWords motoru', () => {
@@ -173,6 +179,91 @@ describe('ABACUS text.lower, upper, title Türkçe harf motoru', () => {
       expect(title('ve abc')).toBe('Ve Abc');
       expect(title('tyc grup')).toBe('TYC Grup');
       expect(title('çelik metal')).toBe('Çelik Metal');
+    });
+  });
+});
+
+describe('ABACUS text.join ve normalize (telefon/e-posta/web) motoru', () => {
+  describe('join (liste bağlama)', () => {
+    it('eleman listesini Türkçe kurallarına göre bağlar', () => {
+      expect(join([])).toBe('');
+      expect(join(['Ali'])).toBe('Ali');
+      expect(join(['Ali', 'Veli'])).toBe('Ali ve Veli');
+      expect(join(['Ali', 'Veli', 'Can'])).toBe('Ali, Veli ve Can');
+      expect(join(['Ali', '', 'Can'])).toBe('Ali ve Can');
+    });
+  });
+
+  describe('phone (telefon normalizasyonu)', () => {
+    it('Türkiye cep telefonlarını E.164 ve display biçimine çevirir', () => {
+      const p1 = phone('05321234567');
+      expect(p1.stored).toBe('+905321234567');
+      expect(p1.display).toBe('+90 (532) 123 45 67');
+      expect(p1.raw).toBe('05321234567');
+      expect(p1.valid).toBe(true);
+
+      const p2 = phone('5321234567');
+      expect(p2.stored).toBe('+905321234567');
+      expect(p2.display).toBe('+90 (532) 123 45 67');
+      expect(p2.valid).toBe(true);
+
+      const p3 = phone('+90 532 123 45 67');
+      expect(p3.stored).toBe('+905321234567');
+      expect(p3.display).toBe('+90 (532) 123 45 67');
+      expect(p3.valid).toBe(true);
+
+      const p4 = phone('90 532 123 4567');
+      expect(p4.stored).toBe('+905321234567');
+      expect(p4.display).toBe('+90 (532) 123 45 67');
+      expect(p4.valid).toBe(true);
+
+      const p5 = phone('123');
+      expect(p5.stored).toBe('');
+      expect(p5.display).toBe('');
+      expect(p5.valid).toBe(false);
+    });
+
+    it('whatsapp direct linkini üretir', () => {
+      expect(whatsapp('05321234567')).toBe('https://wa.me/905321234567');
+      expect(whatsapp('123')).toBe('');
+    });
+  });
+
+  describe('email (e-posta normalizasyonu)', () => {
+    it('e-posta adreslerini temizler ve doğrular', () => {
+      const e1 = email('  Info@X.CoM ');
+      expect(e1.stored).toBe('info@x.com');
+      expect(e1.display).toBe('info@x.com');
+      expect(e1.valid).toBe(true);
+
+      const e2 = email('abc');
+      expect(e2.stored).toBe('');
+      expect(e2.valid).toBe(false);
+    });
+  });
+
+  describe('website (web sitesi normalizasyonu)', () => {
+    it('web adreslerini çıplak host haline getirir ve url üretir', () => {
+      const w1 = website('https://www.example.com/');
+      expect(w1.stored).toBe('example.com');
+      expect(w1.display).toBe('example.com');
+      expect(w1.valid).toBe(true);
+      expect(websiteUrl('https://www.example.com/')).toBe('https://example.com');
+
+      const w2 = website('www.Example.com');
+      expect(w2.stored).toBe('example.com');
+      expect(w2.valid).toBe(true);
+      expect(websiteUrl('www.Example.com')).toBe('https://example.com');
+
+      const w3 = website('example.com');
+      expect(w3.stored).toBe('example.com');
+      expect(w3.valid).toBe(true);
+      expect(websiteUrl('example.com')).toBe('https://example.com');
+
+      const w4 = website('');
+      expect(w4.stored).toBe('');
+      expect(w4.valid).toBe(false);
+      expect(websiteUrl('')).toBe('');
     });
   });
 });

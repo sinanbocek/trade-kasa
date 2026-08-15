@@ -16,6 +16,13 @@ export interface SuffixOptions {
 
 export type SuffixArg = SuffixCase | SuffixOptions;
 
+export interface NormalizeResult {
+  stored: string;
+  display: string;
+  raw: string;
+  valid: boolean;
+}
+
 const ONES = ['', 'Bir', 'İki', 'Üç', 'Dört', 'Beş', 'Altı', 'Yedi', 'Sekiz', 'Dokuz'];
 const TENS = ['', 'On', 'Yirmi', 'Otuz', 'Kırk', 'Elli', 'Altmış', 'Yetmiş', 'Seksen', 'Doksan'];
 const SCALES = ['', 'Bin', 'Milyon', 'Milyar', 'Trilyon'];
@@ -53,6 +60,25 @@ const TR_LOWER_TO_UPPER_MAP: Record<string, string> = {
 
 const LOWERCASE_EXCEPTIONS = new Set(['ve', 'ile', 'veya', 'ya', 'da', 'de']);
 const PRESERVED_ABBREVIATIONS = new Set(['TYC', 'A.Ş.', 'Ltd.Şti.', 'San.', 'Tic.']);
+
+/**
+ * ASCII harf küçültme yardımcısı (E-posta ve Web normalizasyonu için).
+ * 'I' harfini Türkçe 'ı' yerine ASCII 'i' yapar.
+ */
+export function toAsciiLower(str: string): string {
+  if (!str) return '';
+  let res = '';
+  for (let i = 0; i < str.length; i++) {
+    const ch = str[i];
+    if (!ch) continue;
+    if (ch >= 'A' && ch <= 'Z') {
+      res += String.fromCharCode(ch.charCodeAt(0) + 32);
+    } else {
+      res += ch;
+    }
+  }
+  return res;
+}
 
 /**
  * Türkçe harf küçültme yardımcısı (Intl / ham toLowerCase kullanılmaz).
@@ -144,6 +170,103 @@ export function title(str: string): string {
   }
 
   return resWords.join(' ');
+}
+
+/** Türkçe eleman birleştirme motoru (ABACUS-SPEC §3.5-e) */
+export function join(items: string[]): string {
+  if (!items) return '';
+  const filtered = items.filter((item) => item != null && item.trim() !== '');
+  if (filtered.length === 0) return '';
+  if (filtered.length === 1) return filtered[0] ?? '';
+  if (filtered.length === 2) return `${filtered[0]} ve ${filtered[1]}`;
+
+  const lastItem = filtered[filtered.length - 1];
+  const previousItems = filtered.slice(0, filtered.length - 1);
+  return `${previousItems.join(', ')} ve ${lastItem}`;
+}
+
+/** Türkiye cep telefonu normalizasyonu (ABACUS-SPEC §3.5-e) */
+export function phone(raw: string): NormalizeResult {
+  if (!raw) return { stored: '', display: '', raw: raw ?? '', valid: false };
+
+  let digits = '';
+  for (let i = 0; i < raw.length; i++) {
+    const ch = raw[i];
+    if (ch && ch >= '0' && ch <= '9') {
+      digits += ch;
+    }
+  }
+
+  let core = '';
+  if (digits.length === 12 && digits.startsWith('905')) {
+    core = digits.slice(2);
+  } else if (digits.length === 11 && digits.startsWith('05')) {
+    core = digits.slice(1);
+  } else if (digits.length === 10 && digits.startsWith('5')) {
+    core = digits;
+  }
+
+  if (core.length === 10 && core.startsWith('5')) {
+    const stored = `+90${core}`;
+    const display = `+90 (${core.slice(0, 3)}) ${core.slice(3, 6)} ${core.slice(6, 8)} ${core.slice(8, 10)}`;
+    return { stored, display, raw, valid: true };
+  }
+
+  return { stored: '', display: '', raw, valid: false };
+}
+
+/** WhatsApp direct link yardımcısı (ABACUS-SPEC §3.5-e) */
+export function whatsapp(raw: string): string {
+  const p = phone(raw);
+  if (!p.valid) return '';
+  return `https://wa.me/${p.stored.slice(1)}`;
+}
+
+/** E-posta adresi normalizasyonu (ABACUS-SPEC §3.5-e) */
+export function email(raw: string): NormalizeResult {
+  if (!raw) return { stored: '', display: '', raw: raw ?? '', valid: false };
+  const clean = toAsciiLower(raw.trim());
+
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (emailRegex.test(clean)) {
+    return { stored: clean, display: clean, raw, valid: true };
+  }
+
+  return { stored: '', display: '', raw, valid: false };
+}
+
+/** Web sitesi adresi normalizasyonu (ABACUS-SPEC §3.5-e) */
+export function website(raw: string): NormalizeResult {
+  if (!raw) return { stored: '', display: '', raw: raw ?? '', valid: false };
+  let clean = toAsciiLower(raw.trim());
+
+  if (clean.startsWith('https://')) {
+    clean = clean.slice(8);
+  } else if (clean.startsWith('http://')) {
+    clean = clean.slice(7);
+  }
+
+  if (clean.startsWith('www.')) {
+    clean = clean.slice(4);
+  }
+
+  while (clean.endsWith('/')) {
+    clean = clean.slice(0, -1);
+  }
+
+  const dotIndex = clean.indexOf('.');
+  if (dotIndex > 0 && dotIndex < clean.length - 1 && !clean.includes(' ')) {
+    return { stored: clean, display: clean, raw, valid: true };
+  }
+
+  return { stored: '', display: '', raw, valid: false };
+}
+
+/** Web sitesi URL link yardımcısı (ABACUS-SPEC §3.5-e) */
+export function websiteUrl(raw: string): string {
+  const w = website(raw);
+  if (!w.valid) return '';
+  return `https://${w.stored}`;
 }
 
 /**

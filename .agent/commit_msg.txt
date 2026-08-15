@@ -1,6 +1,9 @@
-feat(abacus): text upper/lower/title Türkçe harf işlemleri eklendi
+feat(abacus): text join ve normalize (telefon/e-posta/web) eklendi
 
-- Türkçe harf küçültme (lower) toTrLower takma adı olarak dışa aktarıldı
-- Türkçe harf büyütme (upper) i->İ, ı->I ve özel harf eşlemesiyle eklendi (ham toUpperCase kullanılmadı)
-- Türkçe başlık harf (title) kelime baş harfi büyütme ve kısaltma/bağlaç istisna sözlüğü (ve/ile küçük, TYC/A.Ş. korunur) ile eklendi
-- 122 test %100 yeşil
+- join liste bağlama motoru (A, B ve C; boş elemanları eleme) eklendi
+- phone Türkiye cep telefonu E.164 (+905321234567) stored + display (+90 (532) 123 45 67) + whatsapp direct link (https://wa.me/905321234567) ile eklendi
+- email trim + toAsciiLower ile eklendi
+- website çıplak host (example.com) + websiteUrl (https://example.com) ile eklendi
+- NormalizeResult arabirimi (stored/display/raw/valid) tanımlandı
+- Ham toUpperCase/toLowerCase kullanılmadı (kendi toTrLower/toAsciiLower yardımcılarımız kullanıldı)
+- 127 test %100 yeşil

@@ -78,4 +78,10 @@
   - benim/senin/bizim/sizin + acc & gen, onların tüm hâlleri, ince/yuvarlak ünlü çeşitliliği ve money/percent tam kombinasyon testleri eklendi.
   - TDD ile ünlü ile biten kelimelerde tek ünsüzlü iyelik ekinden (`m`, `n`) sonra kök kelime ünlüsüne düşme kenar durumu (`suffix(150000, "money", {iyelik:"benim", hal:"dat"}) -> ₺1.500'ma`) kırmızı kanıtlandı ve `posLastV = lastVowel(posSuffix) ?? lastVowel(lastWord)` mantığı ile düzeltildi.
   - ABACUS `text.suffix` motoru tam matriste %100 mühürlendi.
-  - Vitest testleri (119 test) %100 YEŞİL geçti (`npx tsc --noEmit` 0 hata).
+- **Adım 2d/7 (ABACUS text.upper, lower, title Türkçe Harf Motoru)** tamamlandı:
+  - `lower` motoru `toTrLower` takma adı olarak dışa aktarıldı (`İ->i, I->ı`).
+  - `upper` Türkçe büyütme motoru `i->İ, ı->I` haritası ve ASCII arithmetic ile eklendi (ham `toUpperCase` kullanımı 0).
+  - `title` Türkçe başlık harf motoru kelime baş harfi büyütme ve kısaltma/bağlaç istisna sözlüğü (`ve`, `ile`, `veya`, `ya`, `da`, `de` küçük, `TYC`, `A.Ş.` vb. koruma) ile eklendi.
+  - TDD disipliniyle `text.test.ts` yazıldı (STUB ile `upper` ve `title` kırmızı kanıtlandı).
+  - `text/index.ts` dosyası taranarak ham `toUpperCase`/`toLowerCase` kullanımı 0 adet olarak doğrulandı.
+  - Vitest testleri (122 test) %100 YEŞİL geçti (`npx tsc --noEmit` 0 hata).
