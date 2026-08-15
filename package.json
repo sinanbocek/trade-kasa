@@ -6,9 +6,11 @@
   "description": "Bağımsız trade pozisyon planlayıcı / risk hesaplayıcı — BİST, VİOP, ABD, Kripto.",
   "scripts": {
     "dev": "vite",
-    "build": "tsc --noEmit && vite build",
+    "build": "npm run lint && tsc --noEmit && npm run test && vite build",
     "preview": "vite preview",
-    "lint": "tsc --noEmit"
+    "lint": "eslint .",
+    "test": "vitest run --passWithNoTests",
+    "prepare": "husky"
   },
   "dependencies": {
     "lucide-react": "^0.462.0",
@@ -18,11 +20,19 @@
   "devDependencies": {
     "@types/react": "^18.3.12",
     "@types/react-dom": "^18.3.1",
+    "@typescript-eslint/eslint-plugin": "^8.67.0",
+    "@typescript-eslint/parser": "^8.67.0",
     "@vitejs/plugin-react": "^4.3.4",
     "autoprefixer": "^10.4.20",
+    "eslint": "^10.8.1",
+    "eslint-plugin-boundaries": "^7.2.0",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "husky": "^9.1.7",
+    "lint-staged": "^17.3.0",
     "postcss": "^8.4.49",
     "tailwindcss": "^3.4.15",
     "typescript": "^5.6.3",
-    "vite": "^5.4.11"
+    "vite": "^5.4.11",
+    "vitest": "^4.1.10"
   }
 }

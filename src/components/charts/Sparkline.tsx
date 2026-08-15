@@ -24,9 +24,13 @@ export const Sparkline: React.FC<{
       return [x, y] as const;
     });
 
+    const firstPoint = points[0];
+    const lastPoint = points[points.length - 1];
+    if (!firstPoint || !lastPoint) return { linePath: '', areaPath: '', lastX: 0, lastY: 0 };
+
+    const [fx, fy] = firstPoint;
+    const [lx, ly] = lastPoint;
     const line = points.map(([x, y], i) => `${i === 0 ? 'M' : 'L'}${x.toFixed(1)},${y.toFixed(1)}`).join(' ');
-    const [fx, fy] = points[0];
-    const [lx, ly] = points[points.length - 1];
     const area = `${line} L${lx.toFixed(1)},${height - padY} L${fx.toFixed(1)},${height - padY} Z`;
     void fy;
 

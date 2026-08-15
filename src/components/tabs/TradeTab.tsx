@@ -95,6 +95,7 @@ export const TradeTab: React.FC<Props> = ({ market }) => {
   const insights = useMemo(() => buildInsights(input, r, market, settings), [input, r, market, settings]);
 
   const marketHistory = useMemo(() => historyForMarket(entries, market.key, 24), [entries, market.key]);
+  const lastHistoryEntry = marketHistory[marketHistory.length - 1];
   const canSave = priceN > 0 && resolvedQty > 0;
 
   const handleSave = () => {
@@ -400,7 +401,7 @@ export const TradeTab: React.FC<Props> = ({ market }) => {
               <div className="mt-1 flex items-center justify-between text-[11px] text-[var(--muted)]">
                 <span>{marketHistory.length} kayıt</span>
                 <span className="font-semibold" style={{ color: 'var(--ink-2)' }}>
-                  Son: {fmtPct(marketHistory[marketHistory.length - 1].riskPctTotal, 2)}
+                  Son: {lastHistoryEntry ? fmtPct(lastHistoryEntry.riskPctTotal, 2) : '—'}
                 </span>
               </div>
             </div>
