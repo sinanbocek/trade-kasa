@@ -1,8 +1,12 @@
 import { div, floor, mod } from '../math';
+import { format as formatMoney } from '../money';
 
 export interface NumberToWordsOptions {
   spaced?: boolean;
 }
+
+export type SuffixKind = 'number' | 'money' | 'percent' | 'year';
+export type SuffixCase = 'loc' | 'dat' | 'abl';
 
 const ONES = ['', 'Bir', 'İki', 'Üç', 'Dört', 'Beş', 'Altı', 'Yedi', 'Sekiz', 'Dokuz'];
 const TENS = ['', 'On', 'Yirmi', 'Otuz', 'Kırk', 'Elli', 'Altmış', 'Yetmiş', 'Seksen', 'Doksan'];
@@ -172,4 +176,64 @@ export function endsWithVowel(word: string): boolean {
   const lower = toTrLower(word);
   const lastChar = lower[lower.length - 1];
   return lastChar ? TR_VOWELS.includes(lastChar) : false;
+}
+
+/**
+ * ABACUS Türkçe ek çekim motoru (ABACUS-SPEC §3.5-a).
+ * Ek, sayının okunuşunun (numberToWords) son sesine göre belirlenir.
+ * Kesme işareti (') daima eklenir.
+ */
+export function suffix(value: number, kind: SuffixKind, hal: SuffixCase): string {
+  let formattedValue = '';
+
+  switch (kind) {
+    case 'year':
+    case 'number':
+      formattedValue = `${value}`;
+      break;
+    case 'percent':
+      formattedValue = `%${value}`;
+      break;
+    case 'money':
+      formattedValue = formatMoney(value);
+      break;
+  }
+
+  // Okunuşun son kelimesini spaced: true opsiyonuyla elde et
+  const wordsText = numberToWords(value, { spaced: true });
+  const words = wordsText.split(' ');
+  const lastWord = words[words.length - 1] ?? '';
+
+  const lastV = lastVowel(lastWord);
+  const back = isBackVowel(lastV ?? '');
+  const hard = endsWithHardConsonant(lastWord);
+  const vowelEnd = endsWithVowel(lastWord);
+
+  let s = '';
+
+  switch (hal) {
+    case 'loc':
+      if (hard) {
+        s = back ? 'ta' : 'te';
+      } else {
+        s = back ? 'da' : 'de';
+      }
+      break;
+    case 'abl':
+      if (hard) {
+        s = back ? 'tan' : 'ten';
+      } else {
+        s = back ? 'dan' : 'den';
+      }
+      break;
+    case 'dat':
+      if (vowelEnd) {
+        s = back ? 'ya' : 'ye';
+      } else {
+        s = back ? 'a' : 'e';
+      }
+      break;
+  }
+
+  return `${formattedValue}'${s}`;
 }

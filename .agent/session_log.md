@@ -51,4 +51,5 @@
   - Türkçe büyük-küçük ünlü uyumu ve fıstıkçı şahap sert ünsüz kuralları tanımlandı.
   - Özel TR-duyarlı küçültme fonksiyonu `toTrLower` eklendi (ham `toLowerCase` kullanımı sıfırlandı).
   - TDD disipliniyle `text.test.ts` yazıldı (STUB ile 5 test kırmızı kanıtlandı).
-  - Vitest testleri (98 test) %100 YEŞİL geçti (`npx tsc --noEmit` 0 hata).
+  - `toTrLower` fonksiyonu tek harita öncelikli yönteme refactor edildi ve tam kelime testleri (`İSTANBUL`, `IŞIK` vb.) eklendi.
+  - Vitest testleri (99 test) %100 YEŞİL geçti (`npx tsc --noEmit` 0 hata).

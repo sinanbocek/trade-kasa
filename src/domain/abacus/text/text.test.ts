@@ -6,6 +6,7 @@ import {
   isRoundedVowel,
   lastVowel,
   numberToWords,
+  suffix,
   toTrLower,
 } from './index';
 
@@ -139,5 +140,31 @@ describe('ABACUS text ek-fonetiği temel yardımcıları', () => {
       expect(endsWithVowel('altı')).toBe(true);
       expect(endsWithVowel('kırk')).toBe(false);
     });
+  });
+});
+
+describe('ABACUS text.suffix ek çekimi motoru (loc, dat, abl)', () => {
+  it('loc (bulunma) eklerini doğru üretir (-de/-da/-te/-ta)', () => {
+    expect(suffix(2026, 'year', 'loc')).toBe("2026'da");
+    expect(suffix(2025, 'year', 'loc')).toBe("2025'te");
+    expect(suffix(40, 'number', 'loc')).toBe("40'ta");
+    expect(suffix(3, 'number', 'loc')).toBe("3'te");
+    expect(suffix(100, 'number', 'loc')).toBe("100'de");
+    expect(suffix(1000, 'number', 'loc')).toBe("1000'de");
+  });
+
+  it('abl (çıkma) eklerini doğru üretir (-den/-dan/-ten/-tan)', () => {
+    expect(suffix(2026, 'year', 'abl')).toBe("2026'dan");
+    expect(suffix(40, 'number', 'abl')).toBe("40'tan");
+    expect(suffix(2025, 'year', 'abl')).toBe("2025'ten");
+  });
+
+  it('dat (yönelme) eklerini doğru üretir (-e/-a/-ye/-ya)', () => {
+    expect(suffix(2, 'number', 'dat')).toBe("2'ye");
+    expect(suffix(40, 'number', 'dat')).toBe("40'a");
+    expect(suffix(6, 'number', 'dat')).toBe("6'ya");
+    expect(suffix(3, 'number', 'dat')).toBe("3'e");
+    expect(suffix(2, 'percent', 'dat')).toBe("%2'ye");
+    expect(suffix(1000000, 'number', 'dat')).toBe("1000000'a");
   });
 });

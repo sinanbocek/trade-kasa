@@ -1,7 +1,9 @@
-refactor(abacus): toTrLower tek yöntemli hale getirildi ve kelime testleri eklendi
+feat(abacus): text.suffix ek çekimi (bulunma/yönelme/çıkma) eklendi
 
-- TR-özel harf eşleme haritası + ASCII küçültme tek mantıkta birleştirildi
-- I/İ harflerinin ASCII +32 dalına düşmesi engellendi
-- Tam kelime testleri (İSTANBUL, IŞIK, ÇAĞLAYAN vb.) eklendi
-- Ham toLowerCase/toUpperCase kullanılmadı
-- 99 test %100 yeşil
+- loc (-de/-da/-te/-ta), dat (-e/-a/-ye/-ya) ve abl (-den/-dan/-ten/-tan) hâlleri eklendi
+- Ek seçimi sayının okunuşunun (numberToWords spaced) son kelimesinin son sesine göre belirlendi
+- Ünlü uyumu, sert ünsüz sertleşmesi ve kaynaştırma y harfi kuralı uygulandı
+- Kesme işareti daima eklendi
+- number/money/percent/year kind türleri tanımlandı
+- Kenar durumları (100, 1000, 1000000) doğrulandı
+- 102 test %100 yeşil
