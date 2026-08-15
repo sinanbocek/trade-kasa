@@ -68,4 +68,10 @@
   - 6 iyelik kişisi (`benim`, `senin`, `onun`, `bizim`, `sizin`, `onların`) için yalın hâl ekleri eklendi.
   - Dört yönlü ünlü uyumu ve ünlü/ünsüz sonrası kaynaştırma kuralları uygulandı.
   - TDD disipliniyle `text.test.ts` yazıldı (STUB ile 1 test grubu kırmızı kanıtlandı, regresyon testi yeşil kaldı).
-  - Vitest testleri (111 test) %100 YEŞİL geçti (`npx tsc --noEmit` 0 hata).
+- **Adım 2d/5 (ABACUS text.suffix İyelik ve Hâl Birleşimi - Pronominal-n)** tamamlandı:
+  - `suffix` motorunda `{iyelik, hal}` birlikte verildiğinde iyelik + hâl birleşimi eklendi.
+  - Yalnızca `onun` ve `onların` iyeliklerinden sonra pronominal-n (`n`) türetimi uygulandı.
+  - Hâl ekinin ünlü uyumu iyelikli formun son ünlüsüne göre belirlendi.
+  - Pronominal-n ve ünsüz harfle biten iyeliklerden sonra loc/abl ekleri daima `-da/-de` ve `-dan/-den` olarak üretildi.
+  - SPEC örneği (`%31'ine`), 3-hâl/5-hâl pronominal-n testleri ve tüm regresyon testleri doğrulandı.
+  - Vitest testleri (115 test) %100 YEŞİL geçti (`npx tsc --noEmit` 0 hata).

@@ -1,9 +1,7 @@
-feat(abacus): text.suffix iyelik ve hâl birleşimi (pronominal-n) eklendi
+fix(abacus): text.suffix tam iyelik-hâl matrisi kanıtlandı ve ünlü düşme kenar durumu düzeltildi
 
-- iyelik ve hâl ekinin birlikte verildiği durumlar ({iyelik, hal}) tanımlandı
-- Yalnızca onun ve onların iyeliklerinde araya pronominal-n türetimi eklendi
-- Hâl ekinin ünlü uyumu iyelikli formun son ünlüsüne göre bağlandı
-- Pronominal-n ve ünsüz sonrası loc/abl eklerinin daima -da/-de ve -dan/-den olması sağlandı
-- SPEC kuralı (%31'ine) ve tüm kombinasyon testleri yeşil
-- Tek başına iyelik, tek başına hâl ve string argümantasyon regresyonları korundu
-- 115 test %100 yeşil
+- benim/senin/bizim/sizin acc ve gen hâl ekleri kanıtlandı
+- onların iyelik matrisinin tüm hâlleri (abl, acc, gen, loc) pronominal-n ile doğrulandı
+- İnce/yuvarlak ünlü çeşitliliği ve money/percent kombinasyonları mühürlendi
+- Ünlü ile biten kelimelerde tek ünsüzlü iyelik ekinden (m, n) sonra kök kelime ünlüsüne düşme kenar durumu (lira+m+dat -> ₺1.500'ma) düzeltildi
+- 119 test %100 yeşil

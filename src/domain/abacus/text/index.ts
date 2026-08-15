@@ -260,8 +260,10 @@ export function suffix(value: number, kind: SuffixKind, arg: SuffixArg): string 
   let caseSuffix = '';
   if (opts.hal) {
     if (opts.iyelik) {
-      // Fonoloji iyeliğin son ünlüsüne göre çalışır
-      const posLastV = lastVowel(posSuffix);
+      // Fonoloji iyeliğin son ünlüsüne göre çalışır.
+      // Eğer posSuffix ünsüzden ibaretse (ör. ünlü bitişinde benim -> 'm', senin -> 'n'),
+      // son ünlü kök kelimeden (lastWord) alınır.
+      const posLastV = lastVowel(posSuffix) ?? lastVowel(lastWord);
       const posBack = isBackVowel(posLastV ?? '');
       const posHv = getHarmonyVowel(posLastV);
       const hasPronominalN = opts.iyelik === 'onun' || opts.iyelik === 'onların';
