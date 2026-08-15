@@ -157,3 +157,8 @@
   - `src/domain/abacus/trading/` motorunun 4 modüllü taslağı (`kasa`, `position`, `opportunity`, `engine`) çıkarıldı.
   - ESLint 14 warn uyarısı tek tek `dosya:satır`, ihlal kuralı ve Adım 4 UI bağlama erime yoluyla eşleştirildi.
   - Analiz `PROJECT-NOTES.md` dosyasına "5. Adım 3-4 Geçiş Haritası" başlığıyla işlendi (uygulamada 0 kod değişikliği/taşıması).
+- **Adım 3a Denetim (kasa.ts Guard Temizliği ve Git Yapılandırması)** tamamlandı:
+  - `src/domain/abacus/trading/kasa.ts` içindeki `settings` tipinin zorunlu (required) olması nedeniyle gereksiz `if (!settings)` sessiz-0/null guard'ları tamamen temizlendi.
+  - `npx tsc --noEmit` çalıştırıldı (0 hata); tip güvenliğinin korunduğu kanıtlandı.
+  - `.agent/commit_msg.txt` geçici commit mesaj dosyası `.gitignore`'a eklendi ve git indeksinden untrack edildi.
+  - Vitest testleri (168 test) %100 YEŞİL geçti; working tree `nothing to commit` seviyesinde temizlendi.

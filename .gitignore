@@ -17,3 +17,7 @@ firebase-debug.log
 
 # Claude Code yerel ayarları
 .claude/
+
+# Geçiçi commit mesaj dosyası
+.agent/commit_msg.txt
+
