@@ -201,6 +201,7 @@ export function endsWithVowel(word: string): boolean {
 /**
  * ABACUS Türkçe ek çekim motoru (ABACUS-SPEC §3.5-a).
  * Ek, sayının veya para biriminin (lira) okunuşunun son sesine göre belirlenir.
+ * İyelik ve hâl birleşiminde onun/onların kişileri için pronominal-n araya girer.
  * Kesme işareti (') daima eklenir.
  */
 export function suffix(value: number, kind: SuffixKind, arg: SuffixArg): string {
@@ -225,72 +226,94 @@ export function suffix(value: number, kind: SuffixKind, arg: SuffixArg): string 
     lastWord = words[words.length - 1] ?? '';
   }
 
-  const lastV = lastVowel(lastWord);
-  const back = isBackVowel(lastV ?? '');
-  const hard = endsWithHardConsonant(lastWord);
-  const vowelEnd = endsWithVowel(lastWord);
-
   const opts: SuffixOptions = typeof arg === 'string' ? { hal: arg } : arg;
 
-  let s = '';
-
+  let posSuffix = '';
   if (opts.iyelik) {
+    const lastV = lastVowel(lastWord);
     const hv = getHarmonyVowel(lastV);
+    const back = isBackVowel(lastV ?? '');
+    const vowelEnd = endsWithVowel(lastWord);
+
     switch (opts.iyelik) {
       case 'benim':
-        s = vowelEnd ? 'm' : `${hv}m`;
+        posSuffix = vowelEnd ? 'm' : `${hv}m`;
         break;
       case 'senin':
-        s = vowelEnd ? 'n' : `${hv}n`;
+        posSuffix = vowelEnd ? 'n' : `${hv}n`;
         break;
       case 'onun':
-        s = vowelEnd ? `s${hv}` : hv;
+        posSuffix = vowelEnd ? `s${hv}` : hv;
         break;
       case 'bizim':
-        s = vowelEnd ? `m${hv}z` : `${hv}m${hv}z`;
+        posSuffix = vowelEnd ? `m${hv}z` : `${hv}m${hv}z`;
         break;
       case 'sizin':
-        s = vowelEnd ? `n${hv}z` : `${hv}n${hv}z`;
+        posSuffix = vowelEnd ? `n${hv}z` : `${hv}n${hv}z`;
         break;
       case 'onların':
-        s = back ? 'ları' : 'leri';
+        posSuffix = back ? 'ları' : 'leri';
         break;
     }
-  } else if (opts.hal) {
-    switch (opts.hal) {
-      case 'loc':
-        if (hard) {
-          s = back ? 'ta' : 'te';
-        } else {
-          s = back ? 'da' : 'de';
-        }
-        break;
-      case 'abl':
-        if (hard) {
-          s = back ? 'tan' : 'ten';
-        } else {
-          s = back ? 'dan' : 'den';
-        }
-        break;
-      case 'dat':
-        if (vowelEnd) {
-          s = back ? 'ya' : 'ye';
-        } else {
-          s = back ? 'a' : 'e';
-        }
-        break;
-      case 'acc': {
-        const hv = getHarmonyVowel(lastV);
-        s = vowelEnd ? `y${hv}` : hv;
-        break;
+  }
+
+  let caseSuffix = '';
+  if (opts.hal) {
+    if (opts.iyelik) {
+      // Fonoloji iyeliğin son ünlüsüne göre çalışır
+      const posLastV = lastVowel(posSuffix);
+      const posBack = isBackVowel(posLastV ?? '');
+      const posHv = getHarmonyVowel(posLastV);
+      const hasPronominalN = opts.iyelik === 'onun' || opts.iyelik === 'onların';
+      const buffer = hasPronominalN ? 'n' : '';
+
+      switch (opts.hal) {
+        case 'loc':
+          caseSuffix = `${buffer}${posBack ? 'da' : 'de'}`;
+          break;
+        case 'abl':
+          caseSuffix = `${buffer}${posBack ? 'dan' : 'den'}`;
+          break;
+        case 'dat':
+          caseSuffix = `${buffer}${posBack ? 'a' : 'e'}`;
+          break;
+        case 'acc':
+          caseSuffix = `${buffer}${posHv}`;
+          break;
+        case 'gen':
+          caseSuffix = `${buffer}${posHv}n`;
+          break;
       }
-      case 'gen': {
-        const hv = getHarmonyVowel(lastV);
-        s = vowelEnd ? `n${hv}n` : `${hv}n`;
-        break;
+    } else {
+      // Yalnızca hal ekinde kök kelimeye göre çalışır
+      const lastV = lastVowel(lastWord);
+      const back = isBackVowel(lastV ?? '');
+      const hard = endsWithHardConsonant(lastWord);
+      const vowelEnd = endsWithVowel(lastWord);
+
+      switch (opts.hal) {
+        case 'loc':
+          caseSuffix = hard ? (back ? 'ta' : 'te') : back ? 'da' : 'de';
+          break;
+        case 'abl':
+          caseSuffix = hard ? (back ? 'tan' : 'ten') : back ? 'dan' : 'den';
+          break;
+        case 'dat':
+          caseSuffix = vowelEnd ? (back ? 'ya' : 'ye') : back ? 'a' : 'e';
+          break;
+        case 'acc': {
+          const hv = getHarmonyVowel(lastV);
+          caseSuffix = vowelEnd ? `y${hv}` : hv;
+          break;
+        }
+        case 'gen': {
+          const hv = getHarmonyVowel(lastV);
+          caseSuffix = vowelEnd ? `n${hv}n` : `${hv}n`;
+          break;
+        }
       }
     }
   }
 
-  return `${formattedValue}'${s}`;
+  return `${formattedValue}'${posSuffix}${caseSuffix}`;
 }

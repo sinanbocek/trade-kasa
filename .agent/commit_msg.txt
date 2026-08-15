@@ -1,7 +1,9 @@
-feat(abacus): text.suffix iyelik ekleri (yalın hâl) eklendi
+feat(abacus): text.suffix iyelik ve hâl birleşimi (pronominal-n) eklendi
 
-- 6 iyelik kişisi (benim/senin/onun/bizim/sizin/onların) tanımlandı
-- SuffixArg imzası geriye uyumlu olacak şekilde obje veya string kabul eder hale getirildi
-- Dört yönlü küçük ünlü uyumu ve ünlü/ünsüz sonrası kaynaştırma kuralları uygulandı
-- String argüman kullanan mevcut 109 test ve regresyon testleri korundu
-- 111 test %100 yeşil
+- iyelik ve hâl ekinin birlikte verildiği durumlar ({iyelik, hal}) tanımlandı
+- Yalnızca onun ve onların iyeliklerinde araya pronominal-n türetimi eklendi
+- Hâl ekinin ünlü uyumu iyelikli formun son ünlüsüne göre bağlandı
+- Pronominal-n ve ünsüz sonrası loc/abl eklerinin daima -da/-de ve -dan/-den olması sağlandı
+- SPEC kuralı (%31'ine) ve tüm kombinasyon testleri yeşil
+- Tek başına iyelik, tek başına hâl ve string argümantasyon regresyonları korundu
+- 115 test %100 yeşil

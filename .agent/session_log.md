@@ -63,4 +63,9 @@
   - Dört yönlü küçük ünlü uyumu (`getHarmonyVowel`: a/ı->ı, e/i->i, o/u->u, ö/ü->ü) uygulandı.
   - Ünlü bitişinde kaynaştırma `y` (acc) ve `n` (gen) harfleri tanımlandı.
   - TDD disipliniyle `text.test.ts` yazıldı (STUB ile 2 test grubu kırmızı kanıtlandı).
-  - Vitest testleri (109 test) %100 YEŞİL geçti (`npx tsc --noEmit` 0 hata).
+- **Adım 2d/4 (ABACUS text.suffix İyelik Ekleri - Yalın Hâl)** tamamlandı:
+  - `suffix` imzası geriye uyumlu olacak şekilde `SuffixArg` (string veya `SuffixOptions` objesi) kabul edecek biçimde genişletildi.
+  - 6 iyelik kişisi (`benim`, `senin`, `onun`, `bizim`, `sizin`, `onların`) için yalın hâl ekleri eklendi.
+  - Dört yönlü ünlü uyumu ve ünlü/ünsüz sonrası kaynaştırma kuralları uygulandı.
+  - TDD disipliniyle `text.test.ts` yazıldı (STUB ile 1 test grubu kırmızı kanıtlandı, regresyon testi yeşil kaldı).
+  - Vitest testleri (111 test) %100 YEŞİL geçti (`npx tsc --noEmit` 0 hata).

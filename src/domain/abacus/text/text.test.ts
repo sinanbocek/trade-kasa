@@ -241,4 +241,42 @@ describe('ABACUS text.suffix ek çekimi motoru (loc, dat, abl, acc, gen)', () =>
       expect(suffix(40, 'number', 'loc')).toBe("40'ta");
     });
   });
+
+  describe('iyelik + hâl birleşimi (pronominal-n)', () => {
+    it('onun iyeliğinde pronominal-n ile tüm hâlleri doğru üretir', () => {
+      expect(suffix(3, 'number', { iyelik: 'onun', hal: 'loc' })).toBe("3'ünde");
+      expect(suffix(3, 'number', { iyelik: 'onun', hal: 'dat' })).toBe("3'üne");
+      expect(suffix(3, 'number', { iyelik: 'onun', hal: 'abl' })).toBe("3'ünden");
+      expect(suffix(3, 'number', { iyelik: 'onun', hal: 'acc' })).toBe("3'ünü");
+      expect(suffix(3, 'number', { iyelik: 'onun', hal: 'gen' })).toBe("3'ünün");
+      expect(suffix(2, 'number', { iyelik: 'onun', hal: 'dat' })).toBe("2'sine");
+      expect(suffix(2, 'number', { iyelik: 'onun', hal: 'loc' })).toBe("2'sinde");
+      expect(suffix(40, 'number', { iyelik: 'onun', hal: 'dat' })).toBe("40'ına");
+      expect(suffix(40, 'number', { iyelik: 'onun', hal: 'loc' })).toBe("40'ında");
+      expect(suffix(31, 'percent', { iyelik: 'onun', hal: 'dat' })).toBe("%31'ine");
+      expect(suffix(150000, 'money', { iyelik: 'onun', hal: 'dat' })).toBe("₺1.500'sına");
+      expect(suffix(150000, 'money', { iyelik: 'onun', hal: 'loc' })).toBe("₺1.500'sında");
+    });
+
+    it('onların iyeliğinde pronominal-n ile hâlleri doğru üretir', () => {
+      expect(suffix(40, 'number', { iyelik: 'onların', hal: 'dat' })).toBe("40'larına");
+      expect(suffix(40, 'number', { iyelik: 'onların', hal: 'loc' })).toBe("40'larında");
+      expect(suffix(3, 'number', { iyelik: 'onların', hal: 'dat' })).toBe("3'lerine");
+    });
+
+    it('benim/senin/bizim/sizin iyeliklerinde pronominal-n olmadan hâlleri birleştirir', () => {
+      expect(suffix(40, 'number', { iyelik: 'benim', hal: 'loc' })).toBe("40'ımda");
+      expect(suffix(40, 'number', { iyelik: 'benim', hal: 'dat' })).toBe("40'ıma");
+      expect(suffix(40, 'number', { iyelik: 'benim', hal: 'acc' })).toBe("40'ımı");
+      expect(suffix(40, 'number', { iyelik: 'senin', hal: 'dat' })).toBe("40'ına");
+      expect(suffix(40, 'number', { iyelik: 'bizim', hal: 'loc' })).toBe("40'ımızda");
+      expect(suffix(40, 'number', { iyelik: 'sizin', hal: 'dat' })).toBe("40'ınıza");
+    });
+
+    it('regresyon: tek başına iyelik, tek başına hâl ve string argüman doğru çalışmaya devam eder', () => {
+      expect(suffix(3, 'number', { iyelik: 'onun' })).toBe("3'ü");
+      expect(suffix(40, 'number', 'loc')).toBe("40'ta");
+      expect(suffix(40, 'number', 'dat')).toBe("40'a");
+    });
+  });
 });
