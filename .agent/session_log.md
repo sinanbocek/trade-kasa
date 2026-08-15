@@ -126,3 +126,34 @@
   - `text.email.valid === validate.email` tutarlılık testi süite eklendi.
   - Grep taramasında e-posta regex'inin (`^[^\s@]+@[^\s@]+\.[^\s@]+$`) tam 1 yerde geçtiği kanıtlandı.
   - Vitest testleri (154 test) %100 YEŞİL geçti (`npx tsc --noEmit` 0 hata).
+- **Adım 2g (ABACUS mask PII Gizleme Motoru — Çekirdek Motorlar Kapanışı)** tamamlandı:
+  - `money` (sabit `****` tutar gizleme), `vkn` (`123****890` ortayı maskeleme), `iban` (`TR** **** **** **** **** **01` son 2 hane açık maskeleme), `phone` (`+90 5** *** ** 67` ülke kodu, 5 ve son 2 hane açık maskeleme) fonksiyonları eklendi.
+  - PII gizleme ilkesine uygun olarak yalnız gösterim stringi üretildi; saklanan gerçek veri mutasyonuna uğratılmadı.
+  - Geçersiz veya kısa girdilerde "—" (em dash) döndürüldü.
+  - TDD disipliniyle `mask.test.ts` yazıldı (STUB ile 9 test kırmızı kanıtlandı).
+  - Barrel export (`src/domain/abacus/index.ts`) üzerinden `mask` dışa aktarıldı.
+  - `mask/index.ts` taranarak ham `Math.*`/`toLowerCase`/`toUpperCase` 0 adet olduğu doğrulandı.
+  - ABACUS çekirdek motorları (math, money, date, text, currency, validate, mask) tamamen tamamlandı ve kapatıldı.
+  - Vitest testleri (163 test) %100 YEŞİL geçti (`npx tsc --noEmit` 0 hata).
+- **Adım 3 (ABACUS Çekirdeğinin Taşınabilir Referans Paket Olarak Çıkarılması - abacus-core)** tamamlandı:
+  - `src/domain/abacus/` altındaki tüm modüller bağımlılık ve dış import yönünden denetlendi (dış proje importu: 0 adet).
+  - Proje kökünde bağımsız `abacus-core/` referans paketi dizini oluşturuldu.
+  - `src/domain/abacus/` kaynak ve test dosyalarının tamamı `abacus-core/src/` içerisine kopyalandı.
+  - `abacus-core/package.json` (`decimal.js^10.6.0`, peerDependencies, tsconfig gereksinimleri), `abacus-core/README.md` (motor özetleri ve kırmızı çizgiler) ve `abacus-core/INSTALL.md` (yeni projeye 6 adımda entegrasyon rehberi) oluşturuldu.
+  - Motor kodlarına dokunulmadı; Vitest testleri 14 test dosyasında (163 orijinal + 163 referans = 326 test) %100 YEŞİL geçti.
+  - Talimat uyarınca commit/push/deploy yapılmadı (sadece referans klasör oluşturuldu).
+- **Adım 4 (`snn-abacus-core` Bağımsız GitHub Reposunun Oluşturulması ve Push)** tamamlandı:
+  - `sinanbocek` hesabında private, tamamen boş `snn-abacus-core` GitHub deposu oluşturuldu (`https://github.com/sinanbocek/snn-abacus-core.git`).
+  - `trade-kasa` dışında bağımsız `C:\Users\sboce\Documents\SNN-AI-Asus-Z14\snn-abacus-core\` dizini hazırlandı.
+  - `src/abacus/` altında 7 motor ve testleri kopyalandı; tam ESLint kural bloklu (`no-restricted-properties`/`no-restricted-globals`) `eslint.config.js`, `package.json`, `tsconfig.json`, `README.md`, `INSTALL.md` eklendi.
+  - Bağımsız dizinde `npm install` ve `npm test` çalıştırıldı; 163 unit test %100 YEŞİL geçti; `npm run lint` 0 hata/0 uyarı ile tamamlandı.
+  - Bağımsız `git init`, `git add .`, UTF-8 korumalı ilk commit ve `origin main` push tamamlandı.
+  - `trade-kasa` reposu ve çalışma alanı %100 temiz ve etkilenmemiş olarak korundu (yerel `abacus-core/` "silinebilir" statüsünde tutuldu).
+- **Adım 3 Hazırlık (Temizlik ve 5 Bölümlü Adım 3-4 Geçiş Haritası)** tamamlandı:
+  - `trade-kasa` içerisindeki gereksiz kök `abacus-core/` referans klasörü silindi; `src/domain/abacus/` üretim motoruna dokunulmadı (`npm test` 163 unit test %100 YEŞİL).
+  - `format.ts` altındaki 8 fonksiyonun tam envanteri çıkarıldı; hepsinin ABACUS çekirdek motorlarında (`money`, `math`, `text`) TAM KARŞILANDIĞI ve `format.ts`'in ön koşulsuz silinebileceği kararı bağlandı.
+  - `calc.ts` altındaki 7 fonksiyon analiz edildi ve `(b) Projeye özel SAF HESAP` olarak `src/domain/abacus/trading/` motoruna taşınacağı sınıflandırıldı.
+  - `coach.ts` altındaki `buildInsights` fonksiyonu iki parçalı (saf oran hesapları vs. metin/karar üretimi) analiz edilerek `(c) İş kararı / UI mantığı` sınıflandırmasına alındı.
+  - `src/domain/abacus/trading/` motorunun 4 modüllü taslağı (`kasa`, `position`, `opportunity`, `engine`) çıkarıldı.
+  - ESLint 14 warn uyarısı tek tek `dosya:satır`, ihlal kuralı ve Adım 4 UI bağlama erime yoluyla eşleştirildi.
+  - Analiz `PROJECT-NOTES.md` dosyasına "5. Adım 3-4 Geçiş Haritası" başlığıyla işlendi (uygulamada 0 kod değişikliği/taşıması).

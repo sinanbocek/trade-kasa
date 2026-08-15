@@ -128,3 +128,89 @@ Projede katman kurallarını ve ABACUS yasaklarını makine zorlamasıyla garant
 1. `.github/workflows/ci.yml` oluşturulması.
 2. `src/presentation/` veya `src/components/` altında `Intl|toLocale|toFixed|Decimal|parseFloat` taraması yapan CI grep guard'ın aktifleştirilmesi.
 3. Tam `lint + typecheck + test + build` kanıtının sunularak geçişin tamamlanması.
+
+---
+
+## 5. Adım 3-4 Geçiş Haritası (Tam Fonksiyon Envanteri ve Sınıflandırma)
+
+### 5.1 `format.ts` Tam Fonksiyon Envanteri ve Karar Tablosu
+
+| Fonksiyon (imza) | Ne yapıyor (1 cümle) | ABACUS karşılığı | Durum |
+|---|---|---|---|
+| `fmtCurrency(value: number, currency: Currency = 'TRY', digits = 2): string` | Sayıyı belirtilen para birimi sembolü ve `tr-TR` binlik/ondalık ayraçlarıyla gösterir. | `money.format(amountMinor, { currency, digits })` | `TAM KARŞILANIYOR` |
+| `fmtAmount(value: number, digits = 0): string` | Sayıyı/miktarı `tr-TR` binlik ve 0-4 ondalık basamak ile string'e çevirir. | `money.format` veya `math.round` | `TAM KARŞILANIYOR` |
+| `fmtPct(value: number, digits = 1): string` | Sayıyı yüzde simgesi (`%`) ve virgüllü ondalıkla string'e çevirir. | `text.suffix(val, "percent")` veya `math.round` | `TAM KARŞILANIYOR` |
+| `fmtDecimal(value: number, digits = 1): string` | Ondalık sayıyı belirtilen basamakta virgüllü stringe çevirir. | `math.round` / `String(x).replace('.', ',')` | `TAM KARŞILANIYOR` |
+| `parseNumber(val: string): number` | `tr-TR` biçimli metin girdisini temizleyip ham JS sayısına çevirir. | ABACUS `text` / `math` String köprüsü | `TAM KARŞILANIYOR` |
+| `formatIntInput(val: string): string` | Metin kutusundaki tam sayı girdisini anlık `tr-TR` binlik ayraçlı gösterir. | ABACUS `money.format` / `text` gruptan tam sayı | `TAM KARŞILANIYOR` |
+| `fmtDecimalGrouped(value: number, digits = 0): string` | Ondalıklı sayıyı binlik ayraçlı (nokta) + ondalık (virgül) gösterir. | `money.format(amountMinor, { digits })` | `TAM KARŞILANIYOR` |
+| `formatGroupedInput(raw: string): string` | Serbest ondalık giriş kutuları için canlı binlik nokta ayracı ekler. | ABACUS `money.format` / `text` canlı girdi formatçısı | `TAM KARŞILANIYOR` |
+
+> **Net Karar (format.ts)**: `src/lib/format.ts` içerisindeki 8 fonksiyonun TAMAMI ABACUS çekirdek motorlarında (`money`, `math`, `text`) **TAM KARŞILANMAKTADIR**. Herhangi bir ön fonksiyon eklemesine gerek duyulmaksızın `format.ts` dosyası Adım 4'te **tümüyle silinecektir**.
+
+---
+
+### 5.2 `calc.ts` Tam Fonksiyon Envanteri ve Kova Tablosu
+
+| Fonksiyon (imza) | Ne yapıyor | Çağıran dosyalar | Kova |
+|---|---|---|---|
+| `totalKasaTRY(s: Settings): number` | TL kasalar ile USD kasaların TL karşılığını toplayıp toplam TL kasa değerini hesaplar. | `Hero.tsx`, `calc.ts` | **(b) Projeye özel SAF HESAP** → `domain/abacus/trading/kasa.ts` |
+| `totalKasaTLPart(s: Settings): number` | TL kasaların (`bistKasaTL` + `viopKasaTL`) toplamını döner. | `Hero.tsx` | **(b) Projeye özel SAF HESAP** → `domain/abacus/trading/kasa.ts` |
+| `totalKasaUSDPart(s: Settings): number` | USD kasaların (`abdKasaUSD` + `kriptoKasaUSD`) toplamını döner. | `Hero.tsx` | **(b) Projeye özel SAF HESAP** → `domain/abacus/trading/kasa.ts` |
+| `calculateThresholdDays(targetReturnRatio: number, annualRate: number): number` | Hedeflenen getiriye risksiz faiz oranıyla kaç günde ulaşılacağını bileşik faiz formülüyle hesaplar. | `calc.ts` (`computeTrade`) | **(b) Projeye özel SAF HESAP** → `domain/abacus/trading/opportunity.ts` |
+| `qtyFromVolume(volume: number, price: number, multiplier: number, fractional: boolean): number` | Toplam hacim, fiyat ve kontrat çarpanından miktar türetir. | `TradeTab.tsx` | **(b) Projeye özel SAF HESAP** → `domain/abacus/trading/position.ts` |
+| `volumeFromQty(qty: number, price: number, multiplier: number): number` | Miktar, fiyat ve kontrat çarpanından hacim hesaplar. | `TradeTab.tsx`, `calc.ts` | **(b) Projeye özel SAF HESAP** → `domain/abacus/trading/position.ts` |
+| `computeTrade(input: TradeInput, market: MarketConfig, s: Settings): TradeResult` | Giriş girdisini alarak tüm pozisyon hacmi, teminat, kaldıraç, risk %, R:R ve fırsat maliyeti metriklerini hesaplar. | `TradeTab.tsx` | **(b) Projeye özel SAF HESAP** → `domain/abacus/trading/engine.ts` |
+
+---
+
+### 5.3 `coach.ts` Tam Fonksiyon Envanteri ve Kova Tablosu
+
+| Fonksiyon (imza) | Ne yapıyor | Saf hesap mı, karar mı? | Kova |
+|---|---|---|---|
+| `buildInsights(input: TradeInput, r: TradeResult, market: MarketConfig, settings: Settings): Insight[]` | Girdi ve hesaplanan işlem sonuçlarını 12 farklı risk kategorisinde değerlendirip sıralı koç kartları (`Insight[]`) üretir. | **ÇİFT YAPILI (İki parçalı)**: Oran/mesafe hesapları (`exposureRatio`, `riskRatio`, `rrRatio`, `stopDistPct`) saf hesap; eşik kıyaslaması ve metin üretimi karar/UI mantığıdır. | **(c) İş Kararı / UI Mantığı (Application Layer)** → `src/services/coach/` kalacak. Saf oran hesapları Adım 4'te `trading` motorundaki `TradeResult` metriklerine devredilecek. |
+| `LEVEL_RANK: Record<InsightLevel, number>` | Şiddet seviyesi öncelik sıralaması (`critical: 0`, `warning: 1` vb.). | Karar / Sabit Veri. | **(c) UI Mantığı** |
+| `MAX_VISIBLE_INSIGHTS: number` | Panelde gösterilecek maksimum içgörü kartı sayısı (`8`). | Karar / Sabit Veri. | **(c) UI Mantığı** |
+
+---
+
+### 5.4 ABACUS `trading` Motoru Taslak Önizlemesi (`src/domain/abacus/trading/`)
+
+`(b)` kovasındaki tüm saf hesapları toplayan ve `math` (Decimal.js) ile `currency` motorlarını kullanan tiplenmiş ABACUS motoru taslağı:
+
+1. **`trading/kasa.ts`**:
+   - `totalKasaTRY(settings: Settings): number` (kuruş int) — Toplam TL kasa tutarını hesaplar.
+   - `totalKasaTLPart(settings: Settings): number` (kuruş int) — Yalnızca TL kasalarının toplamını hesaplar.
+   - `totalKasaUSDPart(settings: Settings): number` (kuruş int) — Yalnızca USD kasalarının toplamını hesaplar.
+
+2. **`trading/position.ts`**:
+   - `volumeFromQty(qty: number, priceMinor: number, multiplier: number): number` — Miktar ve fiyattan pozisyon hacmini hesaplar.
+   - `qtyFromVolume(volumeMinor: number, priceMinor: number, multiplier: number, fractional: boolean): number` — Hacimden pozisyon miktarını türetir.
+   - `leverage(volumeNativeMinor: number, capitalUsedNativeMinor: number): number` — Fiili kaldıraç oranını hesaplar.
+
+3. **`trading/opportunity.ts`**:
+   - `calculateThresholdDays(targetReturnRatio: number, annualRate: number): number` — Hedef getirinin risksiz faiz eşik gün sayısını bileşik faizle hesaplar.
+
+4. **`trading/engine.ts`**:
+   - `computeTrade(input: TradeInput, market: MarketConfig, settings: Settings): TradeResult` — `math` ve `currency` motorlarıyla tüm pozisyon, teminat, kaldıraç, risk %, R:R ve bakiye metriklerini hesaplayan ana tiplenmiş motor.
+
+---
+
+### 5.5 ESLint 14 Warn Eşleştirme Listesi (`npm run lint`)
+
+| Sıra | Dosya | Satır | İhlal Edilen Kural | Erime Yolu (Adım 4 UI Bağlama) |
+|---|---|---|---|---|
+| 1 | `src/components/Hero.tsx` | 110 | `no-restricted-properties` (`toLocaleString`) | `ABACUS.money.format` / `currency` kullanımına geçilerek erir. |
+| 2 | `src/components/charts/Sparkline.tsx` | 33 | `no-restricted-properties` (`toFixed` x) | `ABACUS.math.round(x, 1)` kullanımına geçilerek erir. |
+| 3 | `src/components/charts/Sparkline.tsx` | 33 | `no-restricted-properties` (`toFixed` y) | `ABACUS.math.round(y, 1)` kullanımına geçilerek erir. |
+| 4 | `src/components/charts/Sparkline.tsx` | 34 | `no-restricted-properties` (`toFixed` lx) | `ABACUS.math.round(lx, 1)` kullanımına geçilerek erir. |
+| 5 | `src/components/charts/Sparkline.tsx` | 34 | `no-restricted-properties` (`toFixed` fx) | `ABACUS.math.round(fx, 1)` kullanımına geçilerek erir. |
+| 6 | `src/components/tabs/SettingsTab.tsx` | 28 | `react-hooks/exhaustive-deps` (unused disable) | Gereksiz `eslint-disable` satırı silinerek erir. |
+| 7 | `src/context/SettingsContext.tsx` | 50 | `no-restricted-properties` (`toFixed`) | `ABACUS.math.round` / `money` kullanımına geçilerek erir. |
+| 8 | `src/context/SettingsContext.tsx` | 65 | `no-restricted-properties` (`toFixed`) | `ABACUS.math.round` / `money` kullanımına geçilerek erir. |
+| 9 | `src/lib/format.ts` | 14 | `no-restricted-properties` (`toLocaleString`) | **`format.ts` dosyası tamamen silinerek** erir. |
+| 10 | `src/lib/format.ts` | 24 | `no-restricted-properties` (`toLocaleString`) | **`format.ts` dosyası tamamen silinerek** erir. |
+| 11 | `src/lib/format.ts` | 33 | `no-restricted-properties` (`toFixed`) | **`format.ts` dosyası tamamen silinerek** erir. |
+| 12 | `src/lib/format.ts` | 39 | `no-restricted-properties` (`toFixed`) | **`format.ts` dosyası tamamen silinerek** erir. |
+| 13 | `src/lib/format.ts` | 54 | `no-restricted-properties` (`toLocaleString`) | **`format.ts` dosyası tamamen silinerek** erir. |
+| 14 | `src/lib/format.ts` | 60 | `no-restricted-properties` (`toLocaleString`) | **`format.ts` dosyası tamamen silinerek** erir. |
