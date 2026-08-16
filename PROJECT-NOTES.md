@@ -214,3 +214,66 @@ Projede katman kurallarını ve ABACUS yasaklarını makine zorlamasıyla garant
 | 12 | `src/lib/format.ts` | 39 | `no-restricted-properties` (`toFixed`) | **`format.ts` dosyası tamamen silinerek** erir. |
 | 13 | `src/lib/format.ts` | 54 | `no-restricted-properties` (`toLocaleString`) | **`format.ts` dosyası tamamen silinerek** erir. |
 | 14 | `src/lib/format.ts` | 60 | `no-restricted-properties` (`toLocaleString`) | **`format.ts` dosyası tamamen silinerek** erir. |
+
+---
+
+## 6. ABACUS `engine.ts` (`computeTrade`) Geçiş Analizi
+
+### 6.1 Tam İmza ve Tipler
+- **İmza**: `computeTrade(input: TradeInput, market: MarketConfig, s: Settings): TradeResult`
+- **Girdiler**:
+  - `input: TradeInput`: `price` (fiyat), `stop` (stop fiyatı), `tp` (hedef fiyat), `qty` (miktar), `multiplier` (kontrat çarpanı), `marginPerUnit` (birim teminat), `direction` (`'long' | 'short'`).
+  - `market: MarketConfig`: `key`, `label`, `currency` (`'TRY' | 'USD'`), `fractionalQty`, `allowLeverage`, `allowShort`, `defaultMultiplier`, `qtyLabel`, `kasaKey`, `riskFreeKey`.
+  - `s: Settings`: `bistKasaTL`, `viopKasaTL`, `abdKasaUSD`, `kriptoKasaUSD`, `usdTryKuru`, `maxRiskYuzdesi`, `maxPozisyonYuzdesi`, `hedefRR`, `risksizGetiriTL`, `risksizGetiriUSD`.
+- **Çıktı (`TradeResult`)**:
+  - `volumeNative`: Piyasanın kendi para birimindeki toplam pozisyon hacmi.
+  - `volumeTRY`: Pozisyon hacminin TL karşılığı.
+  - `capitalUsedNative`: Kullanılan sermaye/teminat (native).
+  - `capitalUsedTRY`: Kullanılan sermayenin TL karşılığı.
+  - `leverage`: Fiili kaldıraç katı (kaldıraçsız ise 1).
+  - `leveraged`: Kaldıraçlı işlem mi bayrağı (`boolean`).
+  - `potentialLossNative`: Stop çalışırsa olası azami kayıp (native).
+  - `potentialProfitNative`: TP çalışırsa olası azami kazanç (native).
+  - `potentialLossTRY`: Olası azami kaybın TL karşılığı.
+  - `potentialProfitTRY`: Olası azami kazancın TL karşılığı.
+  - `rr`: Risk/Ödül oranı (`number | null`).
+  - `exposurePctTotal`: Pozisyon hacminin toplam kasaya oranı (%).
+  - `exposurePctSub`: Pozisyon hacminin alt kasaya oranı (%).
+  - `riskPctTotal`: Olası kaybın toplam kasaya oranı (%).
+  - `riskPctSub`: Olası kaybın alt kasaya oranı (%).
+  - `thresholdDays`: Hedeflenen kazanca risksiz faizle ulaşma eşik gün sayısı (`number`).
+  - `stopValid`: Stop seviyesi yön açısından geçerli mi (`boolean`).
+  - `tpValid`: TP seviyesi yön açısından geçerli mi (`boolean`).
+  - `insufficientBalance`: Kullanılan sermaye alt kasa bakiyesinden fazla mı (`boolean`).
+
+### 6.2 İç Hesap Adımları ve ABACUS Karşılıkları
+1. **Teminat Belirleme**: `allowLeverage` false ise 0; true ise `input.marginPerUnit`. (ABACUS: Saf guard).
+2. **Kur ve Kasa Toplamı**: `currency.convert` & `trading.kasa.totalKasaTRY(s)`.
+3. **Pozisyon Hacmi**: `trading.position.volumeFromQty` & `currency.convert`.
+4. **Teminat ve Kaldıraç Katı**: `trading.position.leverage` & `currency.convert`.
+5. **Stop/TP Yön Geçerliliği**: Yön bazlı mantıksal sınama (`stopValid`, `tpValid`).
+6. **Kayıp/Kazanç Seviyeleri**: `math.sub`, `math.mul`, `math.max` & `currency.convert`.
+7. **R:R Oranı**: `math.ratio(reward, risk)`.
+8. **Portföy Risk Oranları (%)**: `math.percent(volume, kasa)`.
+9. **Fırsat Maliyeti Eşik Gün**: `trading.opportunity.calculateThresholdDays`.
+10. **Bakiye Yeterliliği**: `capitalUsedNative > subKasaNative`.
+
+### 6.3 Bağımlılık Haritası
+- `computeTrade` mevcut durumda `calc.ts` içerisindeki `totalKasaTRY`, `volumeFromQty`, `calculateThresholdDays` fonksiyonlarını çağırmaktadır. Bu fonksiyonların tamamı ABACUS motorunda (`trading.kasa`, `trading.position`, `trading.opportunity`) yazılmıştır ve test edilmiştir.
+- Kur `s.usdTryKuru` (`Settings`), Çarpan `input.multiplier` (`TradeInput`), Fiyat `input.price` (`TradeInput`) üzerinden beslenir.
+
+### 6.4 Sessiz Fallback ve Float Tuzakları
+- `input.price || 0`, `input.stop || 0`, `input.tp || 0`, `input.qty || 0`, `input.multiplier || 1` sessiz `||` varsayılanları mevcuttur.
+- `s.usdTryKuru || 0` kur 0 varsayılanı kullanmaktadır (ABACUS'ta geçersiz kurda `null` dönecektir).
+- `Math.max(0, perUnitLoss)` ham JS `Math` kullanımı ve IEEE-754 float çarpımları (`volumeNative * rate`) yer almaktadır.
+
+### 6.5 ABACUS Çekirdek İhtiyacı
+- ABACUS `math` motorunda (`add`, `sub`, `mul`, `div`, `round`, `abs`, `floor`, `mod`, `ratio`, `percent`, `pow`, `log`, `max`) ve `currency` / `trading` motorlarında gerekli TÜM temel matematiksel altyapı %100 mevcuttur. Çekirdeğe yeni fonksiyon eklenmesine **İHTİYAÇ YOKTUR**.
+
+### 6.6 Parçalama Önerisi
+`computeTrade` tek devasa fonksiyon yerine `src/domain/abacus/trading/engine.ts` içinde 4 tiplenmiş alt modüle bölünmelidir:
+1. `validateTradeDirections(priceMinor, stopMinor, tpMinor, isLong)`: Yön ve seviye doğrulaması (`stopValid`, `tpValid`).
+2. `computeRiskReward(...)`: Olası kayıp/kazanç (native/TRY) ve R:R hesabı.
+3. `computePortfolioRatios(...)`: Toplam/alt kasa hacim ve risk yüzde oranları.
+4. `computeTrade(...)` (Ana Orkestratör): `trading.position`, `trading.kasa`, `trading.opportunity` ve yukarıdaki modülleri bağlayıp `TradeResult` döner.
+
