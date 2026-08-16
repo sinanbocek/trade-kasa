@@ -23,6 +23,7 @@ export const LEVEL_RANK: Record<InsightLevel, number> = { critical: 0, warning: 
 /**
  * Verilen işlem girdisi + hesap sonucunu yorumlayıp uygulanabilir tüm
  * içgörüleri (insight) üretir. Şiddete göre sıralı döner (kritik → bilgi).
+ * Herhangi bir TradeResult alanı null ise o alana dayalı içgörüler atlanır.
  */
 export function buildInsights(input: TradeInput, r: TradeResult, market: MarketConfig, settings: Settings): Insight[] {
   const insights: Insight[] = [];
@@ -108,95 +109,105 @@ export function buildInsights(input: TradeInput, r: TradeResult, market: MarketC
   // ------------------------------------------------------------------
   // II. HACİM / TOPLAM KASA (7–9)
   // ------------------------------------------------------------------
-  const exposureRatioTotal = settings.maxPozisyonYuzdesi > 0 ? r.exposurePctTotal / settings.maxPozisyonYuzdesi : 0;
-  if (exposureRatioTotal > 1) {
-    push(
-      'exposure-total-exceeded',
-      'critical',
-      'Pozisyon, toplam kasa limitini aşıyor',
-      `Bu işlemin hacmi ${money(r.volumeNative)} — toplam kasanın %${fmtDecimal(r.exposurePctTotal, 1)}'i. Belirlediğin max pozisyon limiti %${fmtDecimal(settings.maxPozisyonYuzdesi, 0)} olduğundan bu, limitin üzerinde. Tek bir işleme bu kadar büyük bir pay ayırmak çeşitlendirmeni azaltıyor; miktarı düşürmeyi düşünebilirsin.`,
-    );
-  } else if (exposureRatioTotal > 0.7) {
-    push(
-      'exposure-total-near-limit',
-      'warning',
-      'Pozisyon limite yaklaşıyor',
-      `Hacim ${money(r.volumeNative)} — toplam kasanın %${fmtDecimal(r.exposurePctTotal, 1)}'i, belirlediğin %${fmtDecimal(settings.maxPozisyonYuzdesi, 0)} limitin yaklaşık %${fmtDecimal(exposureRatioTotal * 100, 0)}'ine ulaşmış durumda. Başka bir fırsat çıkarsa manevra alanının daralabileceğini unutma.`,
-    );
-  } else {
-    push(
-      'exposure-total-safe',
-      'good',
-      'Pozisyon büyüklüğü kontrollü',
-      `Hacim ${money(r.volumeNative)} — toplam kasanın yalnızca %${fmtDecimal(r.exposurePctTotal, 1)}'i, belirlediğin %${fmtDecimal(settings.maxPozisyonYuzdesi, 0)} limitin oldukça altında. Portföyünün büyük kısmı diğer fırsatlar için serbest kalıyor.`,
-    );
+  if (r.exposurePctTotal !== null) {
+    const exposureRatioTotal = settings.maxPozisyonYuzdesi > 0 ? r.exposurePctTotal / settings.maxPozisyonYuzdesi : 0;
+    if (exposureRatioTotal > 1) {
+      push(
+        'exposure-total-exceeded',
+        'critical',
+        'Pozisyon, toplam kasa limitini aşıyor',
+        `Bu işlemin hacmi ${money(r.volumeNative)} — toplam kasanın %${fmtDecimal(r.exposurePctTotal, 1)}'i. Belirlediğin max pozisyon limiti %${fmtDecimal(settings.maxPozisyonYuzdesi, 0)} olduğundan bu, limitin üzerinde. Tek bir işleme bu kadar büyük bir pay ayırmak çeşitlendirmeni azaltıyor; miktarı düşürmeyi düşünebilirsin.`,
+      );
+    } else if (exposureRatioTotal > 0.7) {
+      push(
+        'exposure-total-near-limit',
+        'warning',
+        'Pozisyon limite yaklaşıyor',
+        `Hacim ${money(r.volumeNative)} — toplam kasanın %${fmtDecimal(r.exposurePctTotal, 1)}'i, belirlediğin %${fmtDecimal(settings.maxPozisyonYuzdesi, 0)} limitin yaklaşık %${fmtDecimal(exposureRatioTotal * 100, 0)}'ine ulaşmış durumda. Başka bir fırsat çıkarsa manevra alanının daralabileceğini unutma.`,
+      );
+    } else {
+      push(
+        'exposure-total-safe',
+        'good',
+        'Pozisyon büyüklüğü kontrollü',
+        `Hacim ${money(r.volumeNative)} — toplam kasanın yalnızca %${fmtDecimal(r.exposurePctTotal, 1)}'i, belirlediğin %${fmtDecimal(settings.maxPozisyonYuzdesi, 0)} limitin oldukça altında. Portföyünün büyük kısmı diğer fırsatlar için serbest kalıyor.`,
+      );
+    }
   }
 
   // ------------------------------------------------------------------
   // III. HACİM / ALT KASA — yoğunlaşma (10–11)
   // ------------------------------------------------------------------
-  const exposureRatioSub = settings.maxPozisyonYuzdesi > 0 ? r.exposurePctSub / settings.maxPozisyonYuzdesi : 0;
-  if (exposureRatioSub > 1 && exposureRatioTotal <= 1) {
-    push(
-      'exposure-sub-concentration',
-      'warning',
-      `${market.label} kasasında yoğunlaşma`,
-      `Toplam kasana göre pozisyon büyüklüğün limit içinde kalsa da, bu işlem (${money(r.volumeNative)}) ${market.label} alt kasanın (${money(settings[market.kasaKey] || 0)}) %${fmtDecimal(r.exposurePctSub, 1)}'ini kullanıyor. O piyasadaki bakiyenin büyük kısmını tek işleme bağlamış oluyorsun; isteğe bağlı olarak diğer alt kasalarla dengelemeyi değerlendirebilirsin.`,
-    );
+  if (r.exposurePctSub !== null) {
+    const exposureRatioSub = settings.maxPozisyonYuzdesi > 0 ? r.exposurePctSub / settings.maxPozisyonYuzdesi : 0;
+    const exposureRatioTotal = r.exposurePctTotal !== null && settings.maxPozisyonYuzdesi > 0 ? r.exposurePctTotal / settings.maxPozisyonYuzdesi : 0;
+    if (exposureRatioSub > 1 && exposureRatioTotal <= 1) {
+      push(
+        'exposure-sub-concentration',
+        'warning',
+        `${market.label} kasasında yoğunlaşma`,
+        `Toplam kasana göre pozisyon büyüklüğün limit içinde kalsa da, bu işlem (${money(r.volumeNative)}) ${market.label} alt kasanın (${money(settings[market.kasaKey] || 0)}) %${fmtDecimal(r.exposurePctSub, 1)}'ini kullanıyor. O piyasadaki bakiyenin büyük kısmını tek işleme bağlamış oluyorsun; isteğe bağlı olarak diğer alt kasalarla dengelemeyi değerlendirebilirsin.`,
+      );
+    }
   }
 
   // ------------------------------------------------------------------
   // IV. RİSK (stop geçerliyse) (12–16)
   // ------------------------------------------------------------------
-  const riskRatioTotal = settings.maxRiskYuzdesi > 0 ? r.riskPctTotal / settings.maxRiskYuzdesi : 0;
-  const riskRatioSub = settings.maxRiskYuzdesi > 0 ? r.riskPctSub / settings.maxRiskYuzdesi : 0;
-
   if (stopEntered && r.stopValid) {
-    if (riskRatioTotal > 1.5) {
-      push(
-        'risk-total-far-exceeded',
-        'critical',
-        'Risk, limitin çok üzerinde',
-        `Stop çalışırsa kaybın ${money(r.potentialLossNative)} olur — toplam kasanın %${fmtDecimal(r.riskPctTotal, 2)}'i. Bu, %${fmtDecimal(settings.maxRiskYuzdesi, 0)} olan max risk limitinin oldukça üzerinde. Bu haliyle işlem tek başına önemli bir hasar verebilir; stop seviyesini fiyata yakınlaştırmayı ya da miktarı belirgin şekilde azaltmayı düşünebilirsin.`,
-      );
-    } else if (riskRatioTotal > 1) {
-      push(
-        'risk-total-exceeded',
-        'critical',
-        'Risk, toplam kasa limitini aşıyor',
-        `${market.label} için stop çalışırsa olası kaybın ${money(r.potentialLossNative)} olur — toplam kasanın %${fmtDecimal(r.riskPctTotal, 2)}'i; bu, belirlediğin %${fmtDecimal(settings.maxRiskYuzdesi, 0)} limitinin üzerinde. Stop seviyesini fiyata biraz daha yaklaştırmayı ya da pozisyon miktarını azaltmayı düşünebilirsin.`,
-      );
-    } else if (riskRatioTotal > 0.7) {
-      push(
-        'risk-total-near-limit',
-        'warning',
-        'Risk limite yaklaşıyor',
-        `Olası kayıp ${money(r.potentialLossNative)} — toplam kasanın %${fmtDecimal(r.riskPctTotal, 2)}'i, belirlediğin %${fmtDecimal(settings.maxRiskYuzdesi, 0)} limitin yaklaşık %${fmtDecimal(riskRatioTotal * 100, 0)}'ine ulaşmış. Piyasa koşulları belirsizse stopunu biraz daha sıkı tutmayı değerlendirebilirsin.`,
-      );
-    } else {
-      push(
-        'risk-total-safe',
-        'good',
-        'Risk seviyesi kontrol altında',
-        `Olası kayıp ${money(r.potentialLossNative)} — toplam kasanın yalnızca %${fmtDecimal(r.riskPctTotal, 2)}'i, belirlediğin %${fmtDecimal(settings.maxRiskYuzdesi, 0)} limitin oldukça altında. Bu, disiplinli bir risk boyutlandırması.`,
-      );
+    if (r.riskPctTotal !== null) {
+      const riskRatioTotal = settings.maxRiskYuzdesi > 0 ? r.riskPctTotal / settings.maxRiskYuzdesi : 0;
+      if (riskRatioTotal > 1.5) {
+        push(
+          'risk-total-far-exceeded',
+          'critical',
+          'Risk, limitin çok üzerinde',
+          `Stop çalışırsa kaybın ${money(r.potentialLossNative)} olur — toplam kasanın %${fmtDecimal(r.riskPctTotal, 2)}'i. Bu, %${fmtDecimal(settings.maxRiskYuzdesi, 0)} olan max risk limitinin oldukça üzerinde. Bu haliyle işlem tek başına önemli bir hasar verebilir; stop seviyesini fiyata yakınlaştırmayı ya da miktarı belirgin şekilde azaltmayı düşünebilirsin.`,
+        );
+      } else if (riskRatioTotal > 1) {
+        push(
+          'risk-total-exceeded',
+          'critical',
+          'Risk, toplam kasa limitini aşıyor',
+          `${market.label} için stop çalışırsa olası kaybın ${money(r.potentialLossNative)} olur — toplam kasanın %${fmtDecimal(r.riskPctTotal, 2)}'i; bu, belirlediğin %${fmtDecimal(settings.maxRiskYuzdesi, 0)} limitinin üzerinde. Stop seviyesini fiyata biraz daha yaklaştırmayı ya da pozisyon miktarını azaltmayı düşünebilirsin.`,
+        );
+      } else if (riskRatioTotal > 0.7) {
+        push(
+          'risk-total-near-limit',
+          'warning',
+          'Risk limite yaklaşıyor',
+          `Olası kayıp ${money(r.potentialLossNative)} — toplam kasanın %${fmtDecimal(r.riskPctTotal, 2)}'i, belirlediğin %${fmtDecimal(settings.maxRiskYuzdesi, 0)} limitin yaklaşık %${fmtDecimal(riskRatioTotal * 100, 0)}'ine ulaşmış. Piyasa koşulları belirsizse stopunu biraz daha sıkı tutmayı değerlendirebilirsin.`,
+        );
+      } else {
+        push(
+          'risk-total-safe',
+          'good',
+          'Risk seviyesi kontrol altında',
+          `Olası kayıp ${money(r.potentialLossNative)} — toplam kasanın yalnızca %${fmtDecimal(r.riskPctTotal, 2)}'i, belirlediğin %${fmtDecimal(settings.maxRiskYuzdesi, 0)} limitin oldukça altında. Bu, disiplinli bir risk boyutlandırması.`,
+        );
+      }
     }
 
-    // Alt kasa risk yoğunlaşması
-    if (riskRatioSub > 1 && riskRatioTotal <= 1) {
-      push(
-        'risk-sub-concentration',
-        'warning',
-        `Risk, ${market.label} kasasında yoğunlaşıyor`,
-        `Toplam kasaya göre risk kontrol altında görünse de, olası kayıp (${money(r.potentialLossNative)}) ${market.label} alt kasanın (${money(settings[market.kasaKey] || 0)}) %${fmtDecimal(r.riskPctSub, 2)}'i — bu piyasaya ayırdığın bakiyenin önemli bir kısmı tek işlemde risk altında. Bu genelde alt kasa büyüklüğünün göreli küçük olmasından kaynaklanır.`,
-      );
-    } else if (riskRatioSub < 0.15 && riskRatioTotal < 0.15) {
-      push(
-        'risk-very-conservative',
-        'info',
-        'Oldukça muhafazakâr bir risk seviyesi',
-        `Hem toplam hem ${market.label} kasana göre risk çok düşük: olası kayıp ${money(r.potentialLossNative)}, toplamın yalnızca %${fmtDecimal(r.riskPctTotal, 2)}'i. Bu güvenli bir yaklaşım; istersen sermayeni biraz daha verimli kullanmak için pozisyonu limitler dahilinde büyütmeyi değerlendirebilirsin.`,
-      );
+    if (r.riskPctSub !== null) {
+      const riskRatioTotal = r.riskPctTotal !== null && settings.maxRiskYuzdesi > 0 ? r.riskPctTotal / settings.maxRiskYuzdesi : 0;
+      const riskRatioSub = settings.maxRiskYuzdesi > 0 ? r.riskPctSub / settings.maxRiskYuzdesi : 0;
+
+      // Alt kasa risk yoğunlaşması
+      if (riskRatioSub > 1 && riskRatioTotal <= 1) {
+        push(
+          'risk-sub-concentration',
+          'warning',
+          `Risk, ${market.label} kasasında yoğunlaşıyor`,
+          `Toplam kasaya göre risk kontrol altında görünse de, olası kayıp (${money(r.potentialLossNative)}) ${market.label} alt kasanın (${money(settings[market.kasaKey] || 0)}) %${fmtDecimal(r.riskPctSub, 2)}'i — bu piyasaya ayırdığın bakiyenin önemli bir kısmı tek işlemde risk altında. Bu genelde alt kasa büyüklüğünün göreli küçük olmasından kaynaklanır.`,
+        );
+      } else if (r.riskPctTotal !== null && riskRatioSub < 0.15 && riskRatioTotal < 0.15) {
+        push(
+          'risk-very-conservative',
+          'info',
+          'Oldukça muhafazakâr bir risk seviyesi',
+          `Hem toplam hem ${market.label} kasana göre risk çok düşük: olası kayıp ${money(r.potentialLossNative)}, toplamın yalnızca %${fmtDecimal(r.riskPctTotal, 2)}'i. Bu güvenli bir yaklaşım; istersen sermayeni biraz daha verimli kullanmak için pozisyonu limitler dahilinde büyütmeyi değerlendirebilirsin.`,
+        );
+      }
     }
   }
 
@@ -238,11 +249,8 @@ export function buildInsights(input: TradeInput, r: TradeResult, market: MarketC
 
   // ------------------------------------------------------------------
   // VI. FIRSAT MALİYETİ — RİSKSİZ GETİRİ EŞİK SÜRESİ (21–22)
-  // Not: 30–365 gün arası "orta" durum bilinçli olarak sessiz bırakıldı —
-  // bu bandın neredeyse her kurulumda benzer, aksiyon önermeyen bir mesaja
-  // yol açtığı görüldü. Sadece uçlar (belirgin cazip / belirgin uzun) sinyal verir.
   // ------------------------------------------------------------------
-  if (r.thresholdDays > 0) {
+  if (r.thresholdDays !== null && r.thresholdDays > 0) {
     if (r.thresholdDays <= 21) {
       push(
         'threshold-short',
@@ -309,7 +317,7 @@ export function buildInsights(input: TradeInput, r: TradeResult, market: MarketC
           'Kaldıraçlı işlemde stop yok',
           'Kaldıraçlı pozisyonlarda geçerli bir stop olmadan işlem açmak, ters bir harekette teminatının tamamına yakınını kaybetme riskini beraberinde getirir. Bir stop seviyesi belirlemeden bu pozisyonu açmamayı düşünebilirsin.',
         );
-      } else if (riskRatioTotal <= 0.5) {
+      } else if (r.riskPctTotal !== null && settings.maxRiskYuzdesi > 0 && r.riskPctTotal / settings.maxRiskYuzdesi <= 0.5) {
         push(
           'leverage-controlled-risk',
           'good',
@@ -471,8 +479,8 @@ export function buildInsights(input: TradeInput, r: TradeResult, market: MarketC
   // ------------------------------------------------------------------
   // XII. BİLEŞİK (BİRDEN FAZLA SİNYAL BİR ARADA) (47–50)
   // ------------------------------------------------------------------
-  if (stopEntered && r.stopValid && r.rr !== null && settings.hedefRR > 0) {
-    const riskExceeded = riskRatioTotal > 1;
+  if (stopEntered && r.stopValid && r.rr !== null && settings.hedefRR > 0 && r.riskPctTotal !== null) {
+    const riskExceeded = settings.maxRiskYuzdesi > 0 ? r.riskPctTotal / settings.maxRiskYuzdesi > 1 : false;
     const rrLow = r.rr / settings.hedefRR < 1;
     if (riskExceeded && rrLow) {
       push(
@@ -491,7 +499,7 @@ export function buildInsights(input: TradeInput, r: TradeResult, market: MarketC
     }
   }
 
-  if (riskRatioTotal > 1 && r.leveraged && r.leverage > 5) {
+  if (r.riskPctTotal !== null && settings.maxRiskYuzdesi > 0 && (r.riskPctTotal / settings.maxRiskYuzdesi) > 1 && r.leveraged && r.leverage > 5) {
     push(
       'combo-risk-exceeded-and-high-leverage',
       'critical',

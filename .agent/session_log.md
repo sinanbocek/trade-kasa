@@ -217,4 +217,11 @@
   - `showOrDash` yardımcısı eklenerek `number | null` olan kur/oran alanlarında (kur/kasa yokluğunda) `—` gösterimi sağlandı.
   - 14 `TradeTab.tsx` tsc hatası tamamen çözüldü (kalan 21 `coach.ts` tsc hatası Adım 4c'ye devredildi).
   - Vitest birim ve denklik testleri (219 test) %100 YEŞİL korundu.
+- **Adım 4c (coach.ts Null Güvenlik Güncellemesi & 0 TSC Hatası)** tamamlandı:
+  - `src/lib/coach.ts` içerisine `TradeResult` `number | null` alanları için `if (r.X !== null)` guard'ları eklendi.
+  - Kur veya kasa yokluğunda ilgili metriğe dayalı uyarı/içgörülerin uydurma değerler üretilmeden atlanması sağlandı.
+  - `!`, `?? 0` ve `as number` kullanımı 0; tam TypeScript tip daraltması (type narrowing) uygulandı.
+  - 21 `coach.ts` tsc hatası çözüldü; `npx tsc --noEmit` ilk kez **0 HATA** verdi.
+  - Vitest birim ve denklik testleri (219 test) %100 YEŞİL geçti; linter 0 hata verdi.
+
 
