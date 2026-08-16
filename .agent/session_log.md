@@ -183,3 +183,9 @@
   - `validateTradeDirections` fonksiyonu (Long: stop < price & tp > price, Short: stop > price & tp < price) yazıldı.
   - Fiyat veya seviye <= 0 olduğunda sessiz varsayılan yapılmayıp false dönmesi sağlandı.
   - 8 yeni birim test eklendi; Vitest testleri (192 test) %100 YEŞİL geçti (`npx tsc --noEmit` 0 hata).
+- **Adım 3d/2 (ABACUS trading/engine.ts computeRiskReward Kayıp/Kazanç ve R:R Motoru)** tamamlandı:
+  - `src/domain/abacus/trading/engine.ts` içerisine `computeRiskReward` fonksiyonu ve `RiskRewardResult` arabirimi Kırmızı-Önce TDD disipliniyle eklendi (STUB ile 5 test kırmızı kanıtlandı).
+  - Olası kayıp/kazanç (native kuruş int) ve TRY karşılıkları hesaplandı; negatif farklar `math.max(0, x)` ile kırpıldı.
+  - `rate === null` durumunda TRY karşılıklarının sessiz 0 yapılmayıp `null` dönmesi sağlandı.
+  - R:R oranı `math.ratio(reward, risk)` ile tiplendirildi.
+  - 7 yeni birim test eklendi; Vitest testleri (199 test) %100 YEŞİL geçti (`npx tsc --noEmit` 0 hata).
