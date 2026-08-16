@@ -167,3 +167,9 @@
   - `volumeFromQty` (kuruş int hacim hesabı), `qtyFromVolume` (kesirli/tam sayı miktar hesabı + payda 0 sentinel guard'ı), `leverage` (fiili kaldıraç katı, teminat <= 0 için null) fonksiyonları yazıldı.
   - `math.mul`, `math.div`, `math.floor` kullanıldı; ham `Math.*` kod kullanımı 0.
   - 7 yeni birim test eklendi; Vitest testleri (175 test) %100 YEŞİL geçti (`npx tsc --noEmit` 0 hata).
+- **Adım 3c (ABACUS trading/opportunity.ts Fırsat Maliyeti Eşik Gün Motoru + math pow/log/max)** tamamlandı:
+  - `src/domain/abacus/math/index.ts` motoruna Decimal.js tabanlı `pow` (üs alma), `log` (doğal logaritma `ln`), `max` fonksiyonları ve testleri eklendi.
+  - `src/domain/abacus/trading/opportunity.ts` motoru Kırmızı-Önce TDD disipliniyle eklendi (STUB ile 2 test kırmızı kanıtlandı).
+  - `calculateThresholdDays` bileşik faiz fırsat maliyeti eşik gün motoru yazıldı (günlük faiz oranı: `(1 + annualRate/100)^(1/365) - 1`, eşik gün: `ln(1 + targetReturnRatio) / ln(1 + dailyRate)`).
+  - Ham `Math.*` kod kullanımı 0; geçersiz veya <= 0 faiz/hedef girdilerinde null döndürüldü (sessiz 0 yok).
+  - 9 yeni birim test eklendi; Vitest testleri (184 test) %100 YEŞİL geçti (`npx tsc --noEmit` 0 hata).

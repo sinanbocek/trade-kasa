@@ -1,5 +1,7 @@
 import { describe, expect, it } from 'vitest';
-import { add, sub, mul, div, round, ratio, percent, abs, floor, mod } from './index';
+import { add, sub, mul, div, round, ratio, percent, abs, floor, mod, pow, log, max } from './index';
+
+
 
 describe('ABACUS math motoru', () => {
   describe('add / sub / mul (temel aritmetik)', () => {
@@ -110,4 +112,43 @@ describe('ABACUS math motoru', () => {
       expect(round(res!, 4)).toBe(33.3333);
     });
   });
+
+  describe('pow (üs alma)', () => {
+    it('üs alma işlemini doğru hesaplar (2^3 = 8, 1.35^(1/365))', () => {
+      expect(pow(2, 3)).toBe(8);
+      const res = pow(1.35, 1 / 365);
+      expect(res).not.toBeNull();
+      expect(round(res!, 6)).toBe(1.000823);
+    });
+
+
+    it('base < 0 ise null döner', () => {
+      expect(pow(-2, 0.5)).toBeNull();
+    });
+  });
+
+  describe('log (doğal logaritma)', () => {
+    it('ln(x) doğal logaritmasını doğru hesaplar', () => {
+      const res = log(1.10);
+      expect(res).not.toBeNull();
+      expect(round(res!, 6)).toBe(0.09531);
+    });
+
+    it('x <= 0 ise null döner', () => {
+      expect(log(0)).toBeNull();
+      expect(log(-5)).toBeNull();
+    });
+  });
+
+  describe('max (en büyük sayı)', () => {
+    it('verilen sayılar arasından en büyüğünü döner', () => {
+      expect(max(1, 5, 10, 3)).toBe(10);
+      expect(max(-10, 1)).toBe(1);
+    });
+
+    it('hiç sayı verilmezse null döner', () => {
+      expect(max()).toBeNull();
+    });
+  });
 });
+
