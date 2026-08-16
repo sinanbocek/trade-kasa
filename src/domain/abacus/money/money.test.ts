@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { compact, format, percent, toWords } from './index';
+import { compact, format, fmtDecimalGrouped, percent, toWords } from './index';
+
 
 
 describe('ABACUS money.format motoru', () => {
@@ -72,6 +73,20 @@ describe('ABACUS money.percent motoru', () => {
     expect(percent(undefined)).toBe('—');
   });
 });
+
+describe('ABACUS money.fmtDecimalGrouped motoru', () => {
+
+  it('sabit 4 ondalık basamak ve sondaki sıfırları korur (47.89 -> 47,8900)', () => {
+    expect(fmtDecimalGrouped(47.89, 4)).toBe('47,8900');
+    expect(fmtDecimalGrouped(34.5, 4)).toBe('34,5000');
+    expect(fmtDecimalGrouped(34.1234, 4)).toBe('34,1234');
+  });
+
+  it('binlik ayraç ve 2 ondalık (70000.5 -> 70.000,50)', () => {
+    expect(fmtDecimalGrouped(70000.5, 2)).toBe('70.000,50');
+  });
+});
+
 
 
 describe('ABACUS money.toWords motoru', () => {

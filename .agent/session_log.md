@@ -229,6 +229,12 @@
   - USD para birimi seçeneği ve `percent` gösterim fonksiyonu ABACUS `money` motoruna eklendi.
   - 14 linter uyarısının tamamı eritilerek `npm run lint` **0 HATA, 0 UYARI** seviyesine ulaştı.
   - `npx tsc --noEmit` 0 hata, Vitest testleri (223 test) %100 YEŞİL geçti.
+- **Adım 4 Görsel Regresyon Düzeltmesi (3 Sorun)** tamamlandı:
+  - Hero zemin rengi koyu gradyana geri döndürüldü (`--hero-bg` tanımsız değişkeni kaldırıldı).
+  - Risksiz getiri alanlarının basamak hassasiyeti `digits={2}` yapılarak ondalıklı faiz girişi (34,50 / 2,45) sağlandı.
+  - USD/TRY kur gösterimi `money.fmtDecimalGrouped(rate, 4)` ile sabit 4 ondalık basamağa (`47,8900`) kavuşturuldu ve unit test eklendi.
+  - Vitest birim testleri (225 test) %100 YEŞİL geçti; `npx tsc` 0 hata, `npm run lint` 0 error 0 warning korundu.
+
 
 
 

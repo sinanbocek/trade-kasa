@@ -56,7 +56,13 @@ export const Hero: React.FC = () => {
 
 
   return (
-    <div className="relative overflow-hidden rounded-2xl p-5 text-white shadow-xl sm:p-6" style={{ background: 'var(--hero-bg)' }}>
+    <div
+      className="relative overflow-hidden rounded-2xl p-5 text-white shadow-xl sm:p-6"
+      style={{
+        background: 'linear-gradient(120deg, #0a0b10 0%, #161a2c 30%, #232a4d 60%, #1a3a4a 85%, #0d2b30 100%)',
+        borderColor: 'rgba(255,255,255,0.08)',
+      }}
+    >
       <div className="relative z-10 flex flex-col gap-5 md:flex-row md:items-center md:justify-between">
         {/* Sol: Başlık ve toplam bakiye */}
         <div>
@@ -89,7 +95,7 @@ export const Hero: React.FC = () => {
             <div>
               <span className="block text-[9px] font-bold uppercase tracking-wider text-white/50">USD/TRY</span>
               <span className="block text-sm font-bold tabular-nums leading-tight">
-                {String(math.round(rate, 2)).replace('.', ',')}
+                {money.fmtDecimalGrouped(rate, 4)}
               </span>
               <span className="block text-[9px] text-white/40">
                 {fx.loading ? 'güncelleniyor…' : fx.error ? 'canlı alınamadı' : timeAgo(fx.fetchedAt)}
@@ -99,6 +105,7 @@ export const Hero: React.FC = () => {
           </button>
         </div>
       </div>
+
 
       {/* Kasa dağılımı — parça/bütün */}
       <div className="relative mt-3 border-t pt-3" style={{ borderColor: 'rgba(255,255,255,0.1)' }}>

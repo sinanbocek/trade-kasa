@@ -195,7 +195,7 @@ export const SettingsTab: React.FC = () => {
             label="TL Risksiz Getiri"
             hint="BİST / VİOP"
             suffix="%"
-            digits={0}
+            digits={2}
             value={settings.risksizGetiriTL}
             onCommit={(n) => set({ risksizGetiriTL: n })}
             tip="Parayı hiç riske atmadan (mevduat, bono, para piyasası fonu gibi) elde edebileceğin yıllık faiz oranı. 'Risksiz Getiri Eşik Süresi' hesabında karşılaştırma noktası olarak kullanılır."
@@ -204,11 +204,12 @@ export const SettingsTab: React.FC = () => {
             label="USD Risksiz Getiri"
             hint="ABD / Kripto"
             suffix="%"
-            digits={0}
+            digits={2}
             value={settings.risksizGetiriUSD}
             onCommit={(n) => set({ risksizGetiriUSD: n })}
             tip="USD cinsinden risksiz bir yatırımdan (ör. ABD hazine bonosu, para piyasası fonu) elde edebileceğin yıllık faiz oranı."
           />
+
         </div>
       </section>
 
