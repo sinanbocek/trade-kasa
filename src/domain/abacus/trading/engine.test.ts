@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { computeRiskReward, validateTradeDirections } from './engine';
+import { computePortfolioRatios, computeRiskReward, validateTradeDirections } from './engine';
+
 
 
 describe('ABACUS trading/engine motoru (validateTradeDirections)', () => {
@@ -116,5 +117,66 @@ describe('ABACUS trading/engine motoru (validateTradeDirections)', () => {
       expect(res.rr).toBeNull();
     });
   });
+
+  describe('computePortfolioRatios', () => {
+    it('Standart senaryoda toplam kasa ve alt kasa risk/pozisyon yüzdelerini doğru hesaplar', () => {
+      // volumeTRY = 1.000.000 (100M kuruş), volumeNative = 100M kuruş
+      // potentialLossTRY = 50.000 (5M kuruş), potentialLossNative = 5M kuruş
+      // totalKasaTRY = 10.000.000 (1.000M kuruş), subKasaNative = 5.000.000 (500M kuruş)
+      // expTotal = 100M / 1000M * 100 = 10
+      // expSub = 100M / 500M * 100 = 20
+      // riskTotal = 5M / 1000M * 100 = 0.5
+      // riskSub = 5M / 500M * 100 = 1
+      const res = computePortfolioRatios(
+        100_000_000,
+        100_000_000,
+        5_000_000,
+        5_000_000,
+        1_000_000_000,
+        500_000_000
+      );
+      expect(res.exposurePctTotal).toBe(10);
+      expect(res.exposurePctSub).toBe(20);
+      expect(res.riskPctTotal).toBe(0.5);
+      expect(res.riskPctSub).toBe(1);
+    });
+
+    it('totalKasaTRY=null olduğunda (kur yok) TRY oranları null, native oranlar hesaplanmış döner', () => {
+      const res = computePortfolioRatios(
+        null,
+        100_000_000,
+        null,
+        5_000_000,
+        null,
+        500_000_000
+      );
+      expect(res.exposurePctTotal).toBeNull();
+      expect(res.riskPctTotal).toBeNull();
+      expect(res.exposurePctSub).toBe(20);
+      expect(res.riskPctSub).toBe(1);
+    });
+
+    it('volumeTRY=null veya totalKasaTRY=0 ise exposurePctTotal null döner', () => {
+      const res1 = computePortfolioRatios(null, 100_000_000, 5_000_000, 5_000_000, 1_000_000_000, 500_000_000);
+      expect(res1.exposurePctTotal).toBeNull();
+
+      const res2 = computePortfolioRatios(100_000_000, 100_000_000, 5_000_000, 5_000_000, 0, 500_000_000);
+      expect(res2.exposurePctTotal).toBeNull();
+      expect(res2.riskPctTotal).toBeNull();
+    });
+
+    it('subKasaNative=0 olduğunda (payda 0) alt kasa oranları null döner', () => {
+      const res = computePortfolioRatios(100_000_000, 100_000_000, 5_000_000, 5_000_000, 1_000_000_000, 0);
+      expect(res.exposurePctSub).toBeNull();
+      expect(res.riskPctSub).toBeNull();
+    });
+
+    it('potentialLossNative=0 olduğunda riskPctSub=0 döner (0 risk geçerli sayıdır, null değildir)', () => {
+      const res = computePortfolioRatios(100_000_000, 100_000_000, 0, 0, 1_000_000_000, 500_000_000);
+      expect(res.riskPctSub).toBe(0);
+      expect(res.riskPctTotal).toBe(0);
+    });
+  });
 });
+
 

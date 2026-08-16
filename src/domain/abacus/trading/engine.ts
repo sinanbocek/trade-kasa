@@ -1,9 +1,9 @@
 import { convert } from '../currency';
-import { max, mul, ratio, sub } from '../math';
+import { max, mul, percent, ratio, sub } from '../math';
 
 /**
  * ABACUS Trade Hesaplama Engine Motoru (ABACUS-SPEC §3.3 / §3.4).
- * İşlem yönü, stop/TP geçerliliği, olası kayıp/kazanç (native/TRY) ve R:R metriklerini hesaplar.
+ * İşlem yönü, stop/TP geçerliliği, olası kayıp/kazanç ve portföy risk/yoğunlaşma oranlarını hesaplar.
  */
 
 export interface DirectionValidity {
@@ -17,6 +17,13 @@ export interface RiskRewardResult {
   potentialLossTRY: number | null;
   potentialProfitTRY: number | null;
   rr: number | null;
+}
+
+export interface PortfolioRatios {
+  exposurePctTotal: number | null;
+  exposurePctSub: number | null;
+  riskPctTotal: number | null;
+  riskPctSub: number | null;
 }
 
 /**
@@ -85,5 +92,43 @@ export function computeRiskReward(
     potentialLossTRY,
     potentialProfitTRY,
     rr,
+  };
+}
+
+/**
+ * Toplam kasa (TRY) ve alt kasa (native) bazında portföy yoğunlaşma ve risk yüzdelerini hesaplar.
+ * Kasa değerleri parametre olarak alınır (Settings bağımlılığı yoktur, evrenseldir).
+ * Pay veya payda null ise TRY oranları null döner (null propagasyonu, sessiz 0 yok).
+ * Payda <= 0 olduğunda null döner; pay 0 olduğunda geçerli 0% döner.
+ */
+export function computePortfolioRatios(
+  volumeTRY: number | null,
+  volumeNative: number,
+  potentialLossTRY: number | null,
+  potentialLossNative: number,
+  totalKasaTRY: number | null,
+  subKasaNative: number
+): PortfolioRatios {
+  const exposurePctTotal =
+    volumeTRY === null || totalKasaTRY === null || totalKasaTRY <= 0
+      ? null
+      : percent(volumeTRY, totalKasaTRY);
+
+  const exposurePctSub =
+    subKasaNative <= 0 ? null : percent(volumeNative, subKasaNative);
+
+  const riskPctTotal =
+    potentialLossTRY === null || totalKasaTRY === null || totalKasaTRY <= 0
+      ? null
+      : percent(potentialLossTRY, totalKasaTRY);
+
+  const riskPctSub =
+    subKasaNative <= 0 ? null : percent(potentialLossNative, subKasaNative);
+
+  return {
+    exposurePctTotal,
+    exposurePctSub,
+    riskPctTotal,
+    riskPctSub,
   };
 }

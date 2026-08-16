@@ -189,3 +189,9 @@
   - `rate === null` durumunda TRY karşılıklarının sessiz 0 yapılmayıp `null` dönmesi sağlandı.
   - R:R oranı `math.ratio(reward, risk)` ile tiplendirildi.
   - 7 yeni birim test eklendi; Vitest testleri (199 test) %100 YEŞİL geçti (`npx tsc --noEmit` 0 hata).
+- **Adım 3d/3 (ABACUS trading/engine.ts computePortfolioRatios Portföy Risk/Yoğunlaşma Oranları)** tamamlandı:
+  - `src/domain/abacus/trading/engine.ts` içerisine `computePortfolioRatios` fonksiyonu ve `PortfolioRatios` arabirimi Kırmızı-Önce TDD disipliniyle eklendi (STUB ile 3 test kırmızı kanıtlandı).
+  - Kasa değerleri parametre olarak alınarak evrensel modül yapısı sağlandı (Settings bağımlılığı kaldırıldı).
+  - Toplam ve alt kasa pozisyon yoğunlaşma (`exposurePctTotal`/`Sub`) ve risk yüzdeleri (`riskPctTotal`/`Sub`) `math.percent` ile tiplendirildi.
+  - Kur veya kasa tanımsız ise null propagasyonu sağlandı; 0 pay (%0 risk) ile 0 payda (tanımsız kasa) ayrımı tam korundu.
+  - 5 yeni birim test eklendi; Vitest testleri (204 test) %100 YEŞİL geçti (`npx tsc --noEmit` 0 hata).
