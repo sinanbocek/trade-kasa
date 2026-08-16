@@ -1,0 +1,49 @@
+name: CI Pipeline
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  verify:
+    name: Lint, Typecheck, Test, CI Guard & Build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js environment
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run ESLint
+        run: npm run lint
+
+      - name: Run TypeScript compiler check
+        run: npx tsc --noEmit
+
+      - name: Run Vitest unit tests
+        run: npm run test
+
+      - name: CI Grep Guard (Forbidden raw calls outside src/domain/abacus/)
+        run: |
+          echo "Checking for raw Intl/toLocaleString/toFixed/parseFloat/new Decimal calls outside src/domain/abacus/..."
+          FOUND=$(grep -rnE "(Intl\.|toLocaleString|toLocaleDateString|toLocaleTimeString|\.toFixed|parseFloat|new Decimal)" --exclude-dir="abacus" src/ || true)
+          if [ -n "$FOUND" ]; then
+            echo "❌ ERROR: Forbidden raw calls found outside src/domain/abacus/:"
+            echo "$FOUND"
+            exit 1
+          else
+            echo "✅ CI Grep Guard PASSED: No forbidden raw calls found outside src/domain/abacus/"
+          fi
+
+      - name: Run Production Build
+        run: npm run build

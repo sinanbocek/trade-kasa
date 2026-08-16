@@ -35,9 +35,9 @@ export default [
       ],
     },
     rules: {
-      // Katman sınırları (AI-RULES §2) - Geçiş sürecinde WARN
+      // Katman sınırları (AI-RULES §2) - Error
       'boundaries/element-types': [
-        'warn',
+        'error',
         {
           default: 'allow',
           rules: [
@@ -55,9 +55,9 @@ export default [
         },
       ],
 
-      // ABACUS dışı formatlama/hesap yasakları (AI-RULES §3.8) - Geçiş sürecinde WARN
+      // ABACUS dışı formatlama/hesap yasakları (AI-RULES §3.8) - Error
       'no-restricted-properties': [
-        'warn',
+        'error',
         {
           property: 'toLocaleString',
           message: 'toLocaleString kullanımı yasaktır. Lütfen ABACUS motorunu (money/date) kullanın.',
@@ -76,7 +76,7 @@ export default [
         },
       ],
       'no-restricted-globals': [
-        'warn',
+        'error',
         {
           name: 'Intl',
           message: 'Intl kullanımı yasaktır. Lütfen ABACUS motorlarını kullanın.',
