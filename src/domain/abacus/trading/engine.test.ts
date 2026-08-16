@@ -4,9 +4,9 @@ import { computePortfolioRatios, computeRiskReward, computeTrade, validateTradeD
 
 const mockSettings: Settings = {
   version: 1,
-  bistKasaTL: 500_000_000, // 5.000.000 TL
+  bistKasaTL: 5_000_000, // 5.000.000 TL (float lira)
   viopKasaTL: 0,
-  abdKasaUSD: 500_000_000, // 5.000.000 USD
+  abdKasaUSD: 5_000_000, // 5.000.000 USD (float usd)
   kriptoKasaUSD: 0,
   usdTryKuru: 34,
   maxRiskYuzdesi: 2,
@@ -15,6 +15,7 @@ const mockSettings: Settings = {
   risksizGetiriTL: 35,
   risksizGetiriUSD: 5,
 };
+
 
 const bistMarket: MarketConfig = {
   key: 'bist',

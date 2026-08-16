@@ -147,7 +147,7 @@ export function computeTrade(
   market: MarketConfig,
   s: Settings
 ): TradeResult {
-  // 1. Float parasal girdileri kuruş int'e çevir (Tek Giriş Noktası - gereksiz || 0 / || 1 yok)
+  // 1. Float parasal girdileri kuruş int'e çevir (Tek Giriş Noktası)
   const priceMinor = round(mul(input.price, 100));
   const stopMinor = round(mul(input.stop, 100));
   const tpMinor = round(mul(input.tp, 100));
@@ -185,9 +185,16 @@ export function computeTrade(
     rate
   );
 
-  // 7. Kasa Bakiyeleri (kuruş int)
-  const totalKasaTRYMinor = totalKasaTRY(s);
-  const subKasaNativeMinor = s[market.kasaKey] ?? 0;
+  // 7. Kasa Bakiyeleri (Lira Float Settings -> Kuruş Int Dönüşümü)
+  const sMinor: Settings = {
+    ...s,
+    bistKasaTL: round(mul(s.bistKasaTL ?? 0, 100)),
+    viopKasaTL: round(mul(s.viopKasaTL ?? 0, 100)),
+    abdKasaUSD: round(mul(s.abdKasaUSD ?? 0, 100)),
+    kriptoKasaUSD: round(mul(s.kriptoKasaUSD ?? 0, 100)),
+  };
+  const totalKasaTRYMinor = totalKasaTRY(sMinor);
+  const subKasaNativeMinor = sMinor[market.kasaKey] ?? 0;
 
   // 8. Portföy Yüzdeleri (%)
   const ratios = computePortfolioRatios(
@@ -208,7 +215,7 @@ export function computeTrade(
     }
   }
 
-  // 10. Bakiye Yeterliliği
+  // 10. Bakiye Yeterliliği (Her iki taraf da kuruş int)
   const insufficientBalance = capitalUsedNativeMinor > 0 && capitalUsedNativeMinor > subKasaNativeMinor;
 
   // 11. Kuruş int parasal çıktıları float lira'ya çevir (Tek Çıkış Noktası - Tam Null Propagasyonu)

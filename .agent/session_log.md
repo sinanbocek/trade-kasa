@@ -206,3 +206,9 @@
   - `src/types.ts` `TradeResult` arabiriminde kur ve kasa bağımlı alanlar (`volumeTRY`, `capitalUsedTRY`, `potentialLossTRY`, `potentialProfitTRY`, `exposurePctTotal`, `exposurePctSub`, `riskPctTotal`, `riskPctSub`, `thresholdDays`) `number | null` olarak güncellendi.
   - `computeTrade` çıkışında kur veya kasa yokluğunda TRY ve oran alanlarının `null` kalması (null propagasyonu) sağlandı (sessiz 0 yasağı uygulandı).
   - Vitest testleri (207 test) %100 YEŞİL geçti. `TradeResult` tip değişikliği nedeniyle Adım 4'te eriyecek 35 UI tsc tipi hatası (`TradeTab.tsx`: 14, `coach.ts`: 21) tespit edilip catalog edildi.
+- **Adım 4a Düzeltmesi (computeTrade Kasa Ölçek Uyumsuzluğu Düzeltmesi & Parite Testleri)** tamamlandı:
+  - `totalKasaTRY` ölçek yapısı doğrulandı (kuruş int bekler/döndürür).
+  - `computeTrade` giriş sınırında Yol A seçilerek `s.bistKasaTL`, `s.viopKasaTL`, `s.abdKasaUSD`, `s.kriptoKasaUSD` alanları `mul(x, 100)` ile `sMinor` (kuruş int) yapıldı.
+  - Pozisyon hacmi ile kasa bakiyeleri aynı kuruş int ölçeğine hizalanarak `exposurePct*`, `riskPct*` ve `insufficientBalance` 100 kat sapması tamamen giderildi.
+  - `src/domain/abacus/trading/parity.test.ts` (12 senaryo) eklendi ve %100 YEŞİL geçti.
+  - Vitest testleri (219 test) %100 YEŞİL geçti; `totalKasaTRY` 5 birim testi yeşil kaldı. ABACUS katmanı 0 tsc hatası sağlandı.
