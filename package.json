@@ -1,7 +1,7 @@
 {
   "name": "trade-kasa-yonetimi",
   "private": true,
-  "version": "2.0.0",
+  "version": "2.0.1",
   "type": "module",
   "description": "Bağımsız trade pozisyon planlayıcı / risk hesaplayıcı — BİST, VİOP, ABD, Kripto.",
   "scripts": {
@@ -35,5 +35,8 @@
     "typescript": "^5.6.3",
     "vite": "^5.4.11",
     "vitest": "^4.1.10"
+  },
+  "optionalDependencies": {
+    "@esbuild/linux-x64": "^0.21.5"
   }
 }
