@@ -212,3 +212,9 @@
   - Pozisyon hacmi ile kasa bakiyeleri aynı kuruş int ölçeğine hizalanarak `exposurePct*`, `riskPct*` ve `insufficientBalance` 100 kat sapması tamamen giderildi.
   - `src/domain/abacus/trading/parity.test.ts` (12 senaryo) eklendi ve %100 YEŞİL geçti.
   - Vitest testleri (219 test) %100 YEŞİL geçti; `totalKasaTRY` 5 birim testi yeşil kaldı. ABACUS katmanı 0 tsc hatası sağlandı.
+- **Adım 4b (TradeTab.tsx ABACUS Bağlantısı & Null Gösterimi)** tamamlandı:
+  - `TradeTab.tsx` içerisindeki `computeTrade` çağrısı eski `calc.ts` yerine `src/domain/abacus/trading` motoruna bağlandı.
+  - `showOrDash` yardımcısı eklenerek `number | null` olan kur/oran alanlarında (kur/kasa yokluğunda) `—` gösterimi sağlandı.
+  - 14 `TradeTab.tsx` tsc hatası tamamen çözüldü (kalan 21 `coach.ts` tsc hatası Adım 4c'ye devredildi).
+  - Vitest birim ve denklik testleri (219 test) %100 YEŞİL korundu.
+

@@ -2,15 +2,20 @@ import React, { useMemo, useState } from 'react';
 import { AlertTriangle, Eraser, Lightbulb, Save, Trash2 } from 'lucide-react';
 import type { Direction, MarketConfig, TradeInput } from '../../types';
 import { useSettings } from '../../context/SettingsContext';
-import { useHistory } from '../../hooks/useHistory';
-import { computeTrade, qtyFromVolume, volumeFromQty } from '../../lib/calc';
+import { computeTrade } from '../../domain/abacus/trading';
+import { qtyFromVolume, volumeFromQty } from '../../lib/calc';
 import { buildInsights, MAX_VISIBLE_INSIGHTS } from '../../lib/coach';
-import { historyForMarket } from '../../lib/history';
 import { fmtCurrency, fmtDecimal, fmtDecimalGrouped, fmtPct, parseNumber } from '../../lib/format';
-import { Card, ConfirmDialog, DirectionToggle, InfoTip, NumField, Row } from '../ui';
+import { historyForMarket } from '../../lib/history';
+import { useHistory } from '../../hooks/useHistory';
 import { Meter } from '../charts/Meter';
 import { Sparkline } from '../charts/Sparkline';
 import { CoachPanel } from '../coach/CoachPanel';
+import { Card, ConfirmDialog, DirectionToggle, InfoTip, NumField, Row } from '../ui';
+
+const showOrDash = (val: number | null, formatter: (n: number) => string) =>
+  val === null ? '—' : formatter(val);
+
 
 interface Props {
   market: MarketConfig;
@@ -108,8 +113,8 @@ export const TradeTab: React.FC<Props> = ({ market }) => {
       tp: r.tpValid ? parseNumber(tp) : null,
       qty: resolvedQty,
       volumeNative: r.volumeNative,
-      riskPctTotal: r.riskPctTotal,
-      exposurePctTotal: r.exposurePctTotal,
+      riskPctTotal: r.riskPctTotal ?? 0,
+      exposurePctTotal: r.exposurePctTotal ?? 0,
       rr: r.rr,
     });
     setSavedFlash(true);
@@ -117,10 +122,10 @@ export const TradeTab: React.FC<Props> = ({ market }) => {
   };
 
   // Oranlar (limite göre) — Meter bileşenleri için
-  const riskRatio = settings.maxRiskYuzdesi > 0 ? r.riskPctTotal / settings.maxRiskYuzdesi : 0;
-  const exposureRatio = settings.maxPozisyonYuzdesi > 0 ? r.exposurePctTotal / settings.maxPozisyonYuzdesi : 0;
-  const riskRatioSub = settings.maxRiskYuzdesi > 0 ? r.riskPctSub / settings.maxRiskYuzdesi : 0;
-  const exposureRatioSub = settings.maxPozisyonYuzdesi > 0 ? r.exposurePctSub / settings.maxPozisyonYuzdesi : 0;
+  const riskRatio = r.riskPctTotal !== null && settings.maxRiskYuzdesi > 0 ? r.riskPctTotal / settings.maxRiskYuzdesi : 0;
+  const exposureRatio = r.exposurePctTotal !== null && settings.maxPozisyonYuzdesi > 0 ? r.exposurePctTotal / settings.maxPozisyonYuzdesi : 0;
+  const riskRatioSub = r.riskPctSub !== null && settings.maxRiskYuzdesi > 0 ? r.riskPctSub / settings.maxRiskYuzdesi : 0;
+  const exposureRatioSub = r.exposurePctSub !== null && settings.maxPozisyonYuzdesi > 0 ? r.exposurePctSub / settings.maxPozisyonYuzdesi : 0;
   const rrRatio = r.rr !== null && settings.hedefRR > 0 ? r.rr / settings.hedefRR : 0;
 
   const riskCardTone: 'default' | 'good' | 'warning' | 'critical' = !r.stopValid
@@ -135,8 +140,9 @@ export const TradeTab: React.FC<Props> = ({ market }) => {
   const lossPctOfCapital = r.stopValid && r.capitalUsedNative > 0 ? (r.potentialLossNative / r.capitalUsedNative) * 100 : null;
   const profitPctOfCapital = r.tpValid && r.capitalUsedNative > 0 ? (r.potentialProfitNative / r.capitalUsedNative) * 100 : null;
 
-  const exposureOver = r.exposurePctTotal > settings.maxPozisyonYuzdesi && r.volumeNative > 0;
-  const riskOver = r.stopValid && r.riskPctTotal > settings.maxRiskYuzdesi;
+  const exposureOver = r.exposurePctTotal !== null && r.exposurePctTotal > settings.maxPozisyonYuzdesi && r.volumeNative > 0;
+  const riskOver = r.stopValid && r.riskPctTotal !== null && r.riskPctTotal > settings.maxRiskYuzdesi;
+
 
   return (
     <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
@@ -211,20 +217,22 @@ export const TradeTab: React.FC<Props> = ({ market }) => {
               {fmtCurrency(r.volumeNative, cur, 0)}
             </span>
             {cur === 'USD' && (
-              <span className="block text-[11px] font-medium text-[var(--muted)]">≈ {fmtCurrency(r.volumeTRY, 'TRY', 0)}</span>
+              <span className="block text-[11px] font-medium text-[var(--muted)]">
+                ≈ {showOrDash(r.volumeTRY, (v) => fmtCurrency(v, 'TRY', 0))}
+              </span>
             )}
             <div className="mt-3 space-y-3 border-t pt-3" style={{ borderColor: 'var(--border)' }}>
               <Meter
                 label="Hacim / Toplam Kasa"
                 ratio={exposureRatio}
-                valueLabel={fmtPct(r.exposurePctTotal)}
+                valueLabel={showOrDash(r.exposurePctTotal, fmtPct)}
                 limitLabel={`%${fmtDecimal(settings.maxPozisyonYuzdesi, 0)}`}
                 tip="Bu işlemin hacminin, tüm alt kasaların toplamına (BİST+VİOP+ABD+Kripto, TL karşılığıyla) oranı. Tek işlemde portföyünün ne kadarını kullandığını gösterir. Çubuktaki işaret çizgisi, Ayarlar'da belirlediğin 'Max Pozisyon' limitidir."
               />
               <Meter
                 label={`Hacim / ${market.label} Kasa`}
                 ratio={exposureRatioSub}
-                valueLabel={fmtPct(r.exposurePctSub)}
+                valueLabel={showOrDash(r.exposurePctSub, fmtPct)}
                 limitLabel={`%${fmtDecimal(settings.maxPozisyonYuzdesi, 0)}`}
                 tip={`Bu işlemin hacminin, yalnızca ${market.label} alt kasasına oranı — toplam kasa değil, sadece bu piyasaya ayırdığın bakiye baz alınır. Aynı "Max Pozisyon" limitiyle karşılaştırılır; küçük bir alt kasada yüksek çıkması, o piyasada yoğunlaştığını gösterir.`}
               />
@@ -302,14 +310,14 @@ export const TradeTab: React.FC<Props> = ({ market }) => {
                   <Meter
                     label="Risk / Toplam Kasa"
                     ratio={riskRatio}
-                    valueLabel={fmtPct(r.riskPctTotal, 2)}
+                    valueLabel={showOrDash(r.riskPctTotal, (v) => fmtPct(v, 2))}
                     limitLabel={`%${fmtDecimal(settings.maxRiskYuzdesi, 0)}`}
                     tip="Stop çalışırsa kaybedeceğin tutarın, tüm alt kasaların toplamına (TL karşılığıyla) oranı. Bu, bir işlemde gerçekten göze aldığın risktir — hacimden farklıdır. İşaret çizgisi Ayarlar'daki 'Max Risk' limitidir."
                   />
                   <Meter
                     label={`Risk / ${market.label} Kasa`}
                     ratio={riskRatioSub}
-                    valueLabel={fmtPct(r.riskPctSub, 2)}
+                    valueLabel={showOrDash(r.riskPctSub, (v) => fmtPct(v, 2))}
                     limitLabel={`%${fmtDecimal(settings.maxRiskYuzdesi, 0)}`}
                     tip={`Stop çalışırsa kaybedeceğin tutarın, yalnızca ${market.label} alt kasasına oranı. Aynı "Max Risk" limitiyle karşılaştırılır.`}
                   />
@@ -341,7 +349,7 @@ export const TradeTab: React.FC<Props> = ({ market }) => {
                 </div>
               )}
 
-              {r.thresholdDays > 0 && (
+              {r.thresholdDays !== null && r.thresholdDays > 0 && (
                 <div className="flex flex-col gap-0.5 border-t pt-2 text-xs" style={{ borderColor: 'var(--border-strong)' }}>
                   <div className="flex justify-between font-bold opacity-90">
                     <span className="inline-flex items-center text-[11px]">
@@ -352,6 +360,7 @@ export const TradeTab: React.FC<Props> = ({ market }) => {
                     </span>
                     <span>{r.thresholdDays} Gün</span>
                   </div>
+
                   <span className="text-[9px] font-normal leading-tight opacity-75">
                     %{fmtDecimal(settings[market.riskFreeKey], 0)} risksiz getiri eşiğine göre.
                   </span>

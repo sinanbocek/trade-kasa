@@ -22,7 +22,8 @@ describe('computeTrade Parite / Denklik Testleri (Eski calc.ts ↔ Yeni ABACUS e
     expect(abacus.stopValid).toBe(legacy.stopValid);
     expect(abacus.tpValid).toBe(legacy.tpValid);
     expect(abacus.insufficientBalance).toBe(legacy.insufficientBalance);
-    expect(abacus.thresholdDays).toBe(legacy.thresholdDays > 0 ? legacy.thresholdDays : null);
+    expect(abacus.thresholdDays).toBe(legacy.thresholdDays !== null && legacy.thresholdDays > 0 ? legacy.thresholdDays : null);
+
 
     // 3. R:R Oranı
     if (legacy.rr === null) {
