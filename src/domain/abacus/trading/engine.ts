@@ -1,5 +1,9 @@
+import type { MarketConfig, Settings, TradeInput, TradeResult } from '../../../types';
 import { convert } from '../currency';
-import { max, mul, percent, ratio, sub } from '../math';
+import { div, max, mul, percent, ratio, round, sub } from '../math';
+import { totalKasaTRY } from './kasa';
+import { calculateThresholdDays } from './opportunity';
+import { leverage, volumeFromQty } from './position';
 
 /**
  * ABACUS Trade Hesaplama Engine Motoru (ABACUS-SPEC §3.3 / §3.4).
@@ -130,5 +134,103 @@ export function computePortfolioRatios(
     exposurePctSub,
     riskPctTotal,
     riskPctSub,
+  };
+}
+
+/**
+ * ABACUS Ana İşlem Hesaplama Orkestratörü (ABACUS-SPEC §3.3 / §3.4).
+ * Ham TradeInput, MarketConfig ve Settings girdilerini alıp tüm türetilmiş metrikleri hesaplar.
+ * Float <-> Kuruş Int dönüşümleri SADECE bu fonksiyonun giriş ve çıkışında yürütülür.
+ */
+export function computeTrade(
+  input: TradeInput,
+  market: MarketConfig,
+  s: Settings
+): TradeResult {
+  // 1. Float parasal girdileri kuruş int'e çevir (Tek Giriş Noktası)
+  const priceMinor = round(mul(input.price || 0, 100));
+  const stopMinor = round(mul(input.stop || 0, 100));
+  const tpMinor = round(mul(input.tp || 0, 100));
+  const qty = input.qty || 0;
+  const multiplier = input.multiplier || 1;
+  const marginPerUnitMinor = market.allowLeverage ? round(mul(input.marginPerUnit || 0, 100)) : 0;
+  const isLong = input.direction === 'long';
+
+  // 2. Kur belirleme (geçersiz ise null)
+  const rate = market.currency === 'USD' ? (s.usdTryKuru > 0 ? s.usdTryKuru : null) : 1;
+
+  // 3. Yön ve seviye doğrulaması
+  const { stopValid, tpValid } = validateTradeDirections(priceMinor, stopMinor, tpMinor, isLong);
+
+  // 4. Pozisyon Hacmi (kuruş int)
+  const volumeNativeMinor = volumeFromQty(qty, priceMinor, multiplier);
+  const volumeTRYMinor = rate === null ? null : convert(volumeNativeMinor, rate);
+
+  // 5. Sermaye / Teminat ve Kaldıraç Katı
+  const leveraged = marginPerUnitMinor > 0 && market.allowLeverage;
+  const capitalUsedNativeMinor = leveraged ? mul(qty, marginPerUnitMinor) : volumeNativeMinor;
+  const capitalUsedTRYMinor = rate === null ? null : convert(capitalUsedNativeMinor, rate);
+  const levRatio = leveraged ? (leverage(volumeNativeMinor, capitalUsedNativeMinor) ?? 1) : 1;
+
+  // 6. Risk / Ödül metrikleri
+  const riskReward = computeRiskReward(
+    priceMinor,
+    stopMinor,
+    tpMinor,
+    qty,
+    multiplier,
+    isLong,
+    stopValid,
+    tpValid,
+    rate
+  );
+
+  // 7. Kasa Bakiyeleri (kuruş int)
+  const totalKasaTRYMinor = totalKasaTRY(s);
+  const subKasaNativeMinor = s[market.kasaKey] ?? 0;
+
+  // 8. Portföy Yüzdeleri (%)
+  const ratios = computePortfolioRatios(
+    volumeTRYMinor,
+    volumeNativeMinor,
+    riskReward.potentialLossTRY,
+    riskReward.potentialLossNative,
+    totalKasaTRYMinor,
+    subKasaNativeMinor
+  );
+
+  // 9. Fırsat Maliyeti Eşik Süresi (gün)
+  let thresholdDays = 0;
+  if (tpValid && capitalUsedNativeMinor > 0) {
+    const targetReturnRatio = div(riskReward.potentialProfitNative, capitalUsedNativeMinor);
+    if (targetReturnRatio !== null) {
+      thresholdDays = calculateThresholdDays(targetReturnRatio, s[market.riskFreeKey] || 0) ?? 0;
+    }
+  }
+
+  // 10. Bakiye Yeterliliği
+  const insufficientBalance = capitalUsedNativeMinor > 0 && capitalUsedNativeMinor > subKasaNativeMinor;
+
+  // 11. Kuruş int parasal çıktıları float lira'ya çevir (Tek Çıkış Noktası)
+  return {
+    volumeNative: div(volumeNativeMinor, 100) ?? 0,
+    volumeTRY: volumeTRYMinor !== null ? (div(volumeTRYMinor, 100) ?? 0) : 0,
+    capitalUsedNative: div(capitalUsedNativeMinor, 100) ?? 0,
+    capitalUsedTRY: capitalUsedTRYMinor !== null ? (div(capitalUsedTRYMinor, 100) ?? 0) : 0,
+    leverage: levRatio,
+    leveraged,
+    potentialLossNative: div(riskReward.potentialLossNative, 100) ?? 0,
+    potentialProfitNative: div(riskReward.potentialProfitNative, 100) ?? 0,
+    potentialLossTRY: riskReward.potentialLossTRY !== null ? (div(riskReward.potentialLossTRY, 100) ?? 0) : 0,
+    potentialProfitTRY: riskReward.potentialProfitTRY !== null ? (div(riskReward.potentialProfitTRY, 100) ?? 0) : 0,
+    rr: riskReward.rr,
+    exposurePctTotal: ratios.exposurePctTotal ?? 0,
+    exposurePctSub: ratios.exposurePctSub ?? 0,
+    riskPctTotal: ratios.riskPctTotal ?? 0,
+    riskPctSub: ratios.riskPctSub ?? 0,
+    thresholdDays,
+    stopValid,
+    tpValid,
+    insufficientBalance,
   };
 }

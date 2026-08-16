@@ -195,3 +195,9 @@
   - Toplam ve alt kasa pozisyon yoğunlaşma (`exposurePctTotal`/`Sub`) ve risk yüzdeleri (`riskPctTotal`/`Sub`) `math.percent` ile tiplendirildi.
   - Kur veya kasa tanımsız ise null propagasyonu sağlandı; 0 pay (%0 risk) ile 0 payda (tanımsız kasa) ayrımı tam korundu.
   - 5 yeni birim test eklendi; Vitest testleri (204 test) %100 YEŞİL geçti (`npx tsc --noEmit` 0 hata).
+- **Adım 3d/4 (ABACUS trading/engine.ts computeTrade Ana İşlem Hesaplama Orkestratörü)** tamamlandı:
+  - `src/domain/abacus/trading/engine.ts` içerisine `computeTrade` ana orkestratör fonksiyonu Kırmızı-Önce TDD disipliniyle eklendi (STUB ile 3 test kırmızı kanıtlandı).
+  - Float <-> Kuruş Int ölçek dönüşümleri yalnızca giriş ve çıkış noktalarında (tek merkez) tanımlandı.
+  - `kasa`, `position`, `opportunity`, `validateTradeDirections`, `computeRiskReward`, `computePortfolioRatios` motorları tam entegre edildi.
+  - UI `TradeResult` arabirimi ve imzası %100 korundu; ham `Math.*` kullanımı 0.
+  - 3 yeni orkestrasyon testi eklendi; Vitest testleri (207 test) %100 YEŞİL geçti (`npx tsc --noEmit` 0 hata).

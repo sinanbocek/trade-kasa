@@ -1,5 +1,47 @@
 import { describe, expect, it } from 'vitest';
-import { computePortfolioRatios, computeRiskReward, validateTradeDirections } from './engine';
+import type { MarketConfig, Settings, TradeInput } from '../../../types';
+import { computePortfolioRatios, computeRiskReward, computeTrade, validateTradeDirections } from './engine';
+
+const mockSettings: Settings = {
+  version: 1,
+  bistKasaTL: 500_000_000, // 5.000.000 TL
+  viopKasaTL: 0,
+  abdKasaUSD: 500_000_000, // 5.000.000 USD
+  kriptoKasaUSD: 0,
+  usdTryKuru: 34,
+  maxRiskYuzdesi: 2,
+  maxPozisyonYuzdesi: 25,
+  hedefRR: 2.5,
+  risksizGetiriTL: 35,
+  risksizGetiriUSD: 5,
+};
+
+const bistMarket: MarketConfig = {
+  key: 'bist',
+  label: 'BİST',
+  currency: 'TRY',
+  fractionalQty: false,
+  allowLeverage: false,
+  allowShort: false,
+  defaultMultiplier: 1,
+  qtyLabel: 'Lot',
+  kasaKey: 'bistKasaTL',
+  riskFreeKey: 'risksizGetiriTL',
+};
+
+const abdMarket: MarketConfig = {
+  key: 'abd',
+  label: 'ABD',
+  currency: 'USD',
+  fractionalQty: true,
+  allowLeverage: false,
+  allowShort: true,
+  defaultMultiplier: 1,
+  qtyLabel: 'Adet',
+  kasaKey: 'abdKasaUSD',
+  riskFreeKey: 'risksizGetiriUSD',
+};
+
 
 
 
@@ -177,6 +219,88 @@ describe('ABACUS trading/engine motoru (validateTradeDirections)', () => {
       expect(res.riskPctTotal).toBe(0);
     });
   });
+
+  describe('computeTrade (Ana Orkestratör)', () => {
+    it('Standart Long TL işleminde tüm metrikleri float lira bazında eksiksiz hesaplar', () => {
+      const input: TradeInput = {
+        price: 100,
+        stop: 95,
+        tp: 110,
+        qty: 10,
+        multiplier: 1,
+        marginPerUnit: 0,
+        direction: 'long',
+      };
+      // mockSettings: bistKasaTL = 500.000.000 kuruş (5.000.000 TL), abdKasaUSD = 500.000.000 USD (17.000.000.000 kuruş)
+      // subKasaNative = 5.000.000 TL -> exposurePctSub = 1.000 / 5.000.000 * 100 = 0.02 %
+      // riskPctSub = 50 / 5.000.000 * 100 = 0.001 %
+      const res = computeTrade(input, bistMarket, mockSettings);
+
+      expect(res.volumeNative).toBe(1000);
+      expect(res.volumeTRY).toBe(1000);
+      expect(res.capitalUsedNative).toBe(1000);
+      expect(res.capitalUsedTRY).toBe(1000);
+      expect(res.leverage).toBe(1);
+      expect(res.leveraged).toBe(false);
+      expect(res.potentialLossNative).toBe(50);
+      expect(res.potentialProfitNative).toBe(100);
+      expect(res.potentialLossTRY).toBe(50);
+      expect(res.potentialProfitTRY).toBe(100);
+      expect(res.rr).toBe(2);
+      expect(res.exposurePctSub).toBe(0.02);
+      expect(res.riskPctSub).toBe(0.001);
+      expect(res.thresholdDays).toBe(116);
+      expect(res.stopValid).toBe(true);
+      expect(res.tpValid).toBe(true);
+      expect(res.insufficientBalance).toBe(false);
+    });
+
+
+    it('USD işleminde (rate=34) TRY metriklerini kur çevrimiyle hesaplar', () => {
+      const input: TradeInput = {
+        price: 100,
+        stop: 95,
+        tp: 110,
+        qty: 10,
+        multiplier: 1,
+        marginPerUnit: 0,
+        direction: 'long',
+      };
+      const res = computeTrade(input, abdMarket, mockSettings);
+
+      expect(res.volumeNative).toBe(1000);
+      expect(res.volumeTRY).toBe(34000);
+      expect(res.capitalUsedNative).toBe(1000);
+      expect(res.capitalUsedTRY).toBe(34000);
+      expect(res.potentialLossNative).toBe(50);
+      expect(res.potentialProfitNative).toBe(100);
+      expect(res.potentialLossTRY).toBe(1700);
+      expect(res.potentialProfitTRY).toBe(3400);
+      expect(res.rr).toBe(2);
+    });
+
+    it('Kur geçersiz/0 olduğunda (usdTryKuru=0) TRY metrikleri 0 olarak döner ve uygulama çökmeksizin korunur', () => {
+      const input: TradeInput = {
+        price: 100,
+        stop: 95,
+        tp: 110,
+        qty: 10,
+        multiplier: 1,
+        marginPerUnit: 0,
+        direction: 'long',
+      };
+      const invalidSettings = { ...mockSettings, usdTryKuru: 0 };
+      const res = computeTrade(input, abdMarket, invalidSettings);
+
+      expect(res.volumeNative).toBe(1000);
+      expect(res.volumeTRY).toBe(0);
+      expect(res.potentialLossTRY).toBe(0);
+      expect(res.potentialProfitTRY).toBe(0);
+      expect(res.exposurePctTotal).toBe(0);
+      expect(res.riskPctTotal).toBe(0);
+    });
+  });
 });
+
 
 
