@@ -66,11 +66,11 @@ export interface TradeInput {
 export interface TradeResult {
   // Hacim
   volumeNative: number;
-  volumeTRY: number;
+  volumeTRY: number | null;
 
   // Kullanılan sermaye (teminat varsa teminat, yoksa hacmin kendisi)
   capitalUsedNative: number;
-  capitalUsedTRY: number;
+  capitalUsedTRY: number | null;
 
   leverage: number;
   leveraged: boolean;
@@ -78,20 +78,21 @@ export interface TradeResult {
   // Risk / Ödül (native para biriminde)
   potentialLossNative: number;
   potentialProfitNative: number;
-  potentialLossTRY: number;
-  potentialProfitTRY: number;
+  potentialLossTRY: number | null;
+  potentialProfitTRY: number | null;
   rr: number | null;
 
   // Oranlar (%)
-  exposurePctTotal: number; // hacim / toplam kasa
-  exposurePctSub: number; // hacim / alt kasa
-  riskPctTotal: number; // olası kayıp / toplam kasa
-  riskPctSub: number; // olası kayıp / alt kasa
+  exposurePctTotal: number | null; // hacim / toplam kasa
+  exposurePctSub: number | null; // hacim / alt kasa
+  riskPctTotal: number | null; // olası kayıp / toplam kasa
+  riskPctSub: number | null; // olası kayıp / alt kasa
 
-  thresholdDays: number;
+  thresholdDays: number | null;
 
   // Geçerlilik bayrakları
   stopValid: boolean; // stop yönü doğru mu
   tpValid: boolean; // tp yönü doğru mu
   insufficientBalance: boolean; // kullanılan sermaye alt kasadan büyük mü
 }
+

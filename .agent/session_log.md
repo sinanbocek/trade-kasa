@@ -201,3 +201,8 @@
   - `kasa`, `position`, `opportunity`, `validateTradeDirections`, `computeRiskReward`, `computePortfolioRatios` motorları tam entegre edildi.
   - UI `TradeResult` arabirimi ve imzası %100 korundu; ham `Math.*` kullanımı 0.
   - 3 yeni orkestrasyon testi eklendi; Vitest testleri (207 test) %100 YEŞİL geçti (`npx tsc --noEmit` 0 hata).
+- **Adım 3d/4 Denetim (computeTrade Sessiz 0 Temizliği & TradeResult Null Propagasyonu)** tamamlandı:
+  - `TradeInput` girişlerindeki gereksiz `|| 0` ve `|| 1` guard'ları tamamen kaldırıldı (tipler zorunlu).
+  - `src/types.ts` `TradeResult` arabiriminde kur ve kasa bağımlı alanlar (`volumeTRY`, `capitalUsedTRY`, `potentialLossTRY`, `potentialProfitTRY`, `exposurePctTotal`, `exposurePctSub`, `riskPctTotal`, `riskPctSub`, `thresholdDays`) `number | null` olarak güncellendi.
+  - `computeTrade` çıkışında kur veya kasa yokluğunda TRY ve oran alanlarının `null` kalması (null propagasyonu) sağlandı (sessiz 0 yasağı uygulandı).
+  - Vitest testleri (207 test) %100 YEŞİL geçti. `TradeResult` tip değişikliği nedeniyle Adım 4'te eriyecek 35 UI tsc tipi hatası (`TradeTab.tsx`: 14, `coach.ts`: 21) tespit edilip catalog edildi.

@@ -147,16 +147,16 @@ export function computeTrade(
   market: MarketConfig,
   s: Settings
 ): TradeResult {
-  // 1. Float parasal girdileri kuruş int'e çevir (Tek Giriş Noktası)
-  const priceMinor = round(mul(input.price || 0, 100));
-  const stopMinor = round(mul(input.stop || 0, 100));
-  const tpMinor = round(mul(input.tp || 0, 100));
-  const qty = input.qty || 0;
-  const multiplier = input.multiplier || 1;
-  const marginPerUnitMinor = market.allowLeverage ? round(mul(input.marginPerUnit || 0, 100)) : 0;
+  // 1. Float parasal girdileri kuruş int'e çevir (Tek Giriş Noktası - gereksiz || 0 / || 1 yok)
+  const priceMinor = round(mul(input.price, 100));
+  const stopMinor = round(mul(input.stop, 100));
+  const tpMinor = round(mul(input.tp, 100));
+  const qty = input.qty;
+  const multiplier = input.multiplier;
+  const marginPerUnitMinor = market.allowLeverage ? round(mul(input.marginPerUnit, 100)) : 0;
   const isLong = input.direction === 'long';
 
-  // 2. Kur belirleme (geçersiz ise null)
+  // 2. Kur belirleme (geçersiz/0 ise null - sessiz 0 yok)
   const rate = market.currency === 'USD' ? (s.usdTryKuru > 0 ? s.usdTryKuru : null) : 1;
 
   // 3. Yön ve seviye doğrulaması
@@ -200,34 +200,34 @@ export function computeTrade(
   );
 
   // 9. Fırsat Maliyeti Eşik Süresi (gün)
-  let thresholdDays = 0;
+  let thresholdDays: number | null = null;
   if (tpValid && capitalUsedNativeMinor > 0) {
     const targetReturnRatio = div(riskReward.potentialProfitNative, capitalUsedNativeMinor);
     if (targetReturnRatio !== null) {
-      thresholdDays = calculateThresholdDays(targetReturnRatio, s[market.riskFreeKey] || 0) ?? 0;
+      thresholdDays = calculateThresholdDays(targetReturnRatio, s[market.riskFreeKey] ?? 0);
     }
   }
 
   // 10. Bakiye Yeterliliği
   const insufficientBalance = capitalUsedNativeMinor > 0 && capitalUsedNativeMinor > subKasaNativeMinor;
 
-  // 11. Kuruş int parasal çıktıları float lira'ya çevir (Tek Çıkış Noktası)
+  // 11. Kuruş int parasal çıktıları float lira'ya çevir (Tek Çıkış Noktası - Tam Null Propagasyonu)
   return {
     volumeNative: div(volumeNativeMinor, 100) ?? 0,
-    volumeTRY: volumeTRYMinor !== null ? (div(volumeTRYMinor, 100) ?? 0) : 0,
+    volumeTRY: volumeTRYMinor !== null ? div(volumeTRYMinor, 100) : null,
     capitalUsedNative: div(capitalUsedNativeMinor, 100) ?? 0,
-    capitalUsedTRY: capitalUsedTRYMinor !== null ? (div(capitalUsedTRYMinor, 100) ?? 0) : 0,
+    capitalUsedTRY: capitalUsedTRYMinor !== null ? div(capitalUsedTRYMinor, 100) : null,
     leverage: levRatio,
     leveraged,
     potentialLossNative: div(riskReward.potentialLossNative, 100) ?? 0,
     potentialProfitNative: div(riskReward.potentialProfitNative, 100) ?? 0,
-    potentialLossTRY: riskReward.potentialLossTRY !== null ? (div(riskReward.potentialLossTRY, 100) ?? 0) : 0,
-    potentialProfitTRY: riskReward.potentialProfitTRY !== null ? (div(riskReward.potentialProfitTRY, 100) ?? 0) : 0,
+    potentialLossTRY: riskReward.potentialLossTRY !== null ? div(riskReward.potentialLossTRY, 100) : null,
+    potentialProfitTRY: riskReward.potentialProfitTRY !== null ? div(riskReward.potentialProfitTRY, 100) : null,
     rr: riskReward.rr,
-    exposurePctTotal: ratios.exposurePctTotal ?? 0,
-    exposurePctSub: ratios.exposurePctSub ?? 0,
-    riskPctTotal: ratios.riskPctTotal ?? 0,
-    riskPctSub: ratios.riskPctSub ?? 0,
+    exposurePctTotal: ratios.exposurePctTotal,
+    exposurePctSub: ratios.exposurePctSub,
+    riskPctTotal: ratios.riskPctTotal,
+    riskPctSub: ratios.riskPctSub,
     thresholdDays,
     stopValid,
     tpValid,

@@ -279,7 +279,7 @@ describe('ABACUS trading/engine motoru (validateTradeDirections)', () => {
       expect(res.rr).toBe(2);
     });
 
-    it('Kur geçersiz/0 olduğunda (usdTryKuru=0) TRY metrikleri 0 olarak döner ve uygulama çökmeksizin korunur', () => {
+    it('Kur geçersiz/0 olduğunda (usdTryKuru=0) TRY metrikleri null olarak döner ve null propagasyonu sağlanır', () => {
       const input: TradeInput = {
         price: 100,
         stop: 95,
@@ -293,12 +293,14 @@ describe('ABACUS trading/engine motoru (validateTradeDirections)', () => {
       const res = computeTrade(input, abdMarket, invalidSettings);
 
       expect(res.volumeNative).toBe(1000);
-      expect(res.volumeTRY).toBe(0);
-      expect(res.potentialLossTRY).toBe(0);
-      expect(res.potentialProfitTRY).toBe(0);
-      expect(res.exposurePctTotal).toBe(0);
-      expect(res.riskPctTotal).toBe(0);
+      expect(res.volumeTRY).toBeNull();
+      expect(res.capitalUsedTRY).toBeNull();
+      expect(res.potentialLossTRY).toBeNull();
+      expect(res.potentialProfitTRY).toBeNull();
+      expect(res.exposurePctTotal).toBeNull();
+      expect(res.riskPctTotal).toBeNull();
     });
+
   });
 });
 
