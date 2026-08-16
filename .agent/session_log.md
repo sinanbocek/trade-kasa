@@ -173,3 +173,13 @@
   - `calculateThresholdDays` bileşik faiz fırsat maliyeti eşik gün motoru yazıldı (günlük faiz oranı: `(1 + annualRate/100)^(1/365) - 1`, eşik gün: `ln(1 + targetReturnRatio) / ln(1 + dailyRate)`).
   - Ham `Math.*` kod kullanımı 0; geçersiz veya <= 0 faiz/hedef girdilerinde null döndürüldü (sessiz 0 yok).
   - 9 yeni birim test eklendi; Vitest testleri (184 test) %100 YEŞİL geçti (`npx tsc --noEmit` 0 hata).
+- **Adım 3d/0 (ABACUS engine.ts / computeTrade Yapısal Geçiş Analizi)** tamamlandı:
+  - `src/lib/calc.ts > computeTrade` fonksiyonunun girdileri (`TradeInput`, `MarketConfig`, `Settings`), çıktıları (`TradeResult`) ve 10 adımlı iç hesap mantığı koddan eksiksiz analiz edildi.
+  - Bağımlılık haritası, sessiz fallback/float tuzakları ve parçalama önerileri çıkarıldı.
+  - ABACUS çekirdeğinde (`math`, `currency`, `trading`) tüm altyapının %100 mevcut olduğu ve ek fonksiyon ihtiyacı OLMADIĞI teyit edildi.
+  - Detaylı analiz `PROJECT-NOTES.md` dosyasına "6. ABACUS engine.ts (computeTrade) Geçiş Analizi" başlığıyla eklendi (0 kod/dosya/test değişikliği yapıldı).
+- **Adım 3d/1 (ABACUS trading/engine.ts validateTradeDirections Yön Geçerlilik Motoru)** tamamlandı:
+  - `src/domain/abacus/trading/engine.ts` ve `DirectionValidity` arabirimi Kırmızı-Önce TDD disipliniyle eklendi (STUB ile 7 test kırmızı kanıtlandı).
+  - `validateTradeDirections` fonksiyonu (Long: stop < price & tp > price, Short: stop > price & tp < price) yazıldı.
+  - Fiyat veya seviye <= 0 olduğunda sessiz varsayılan yapılmayıp false dönmesi sağlandı.
+  - 8 yeni birim test eklendi; Vitest testleri (192 test) %100 YEŞİL geçti (`npx tsc --noEmit` 0 hata).
