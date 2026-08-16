@@ -1,5 +1,7 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import type { Settings } from '../types';
+import { math } from '../domain/abacus';
+
 import { DEFAULT_SETTINGS, loadSettings, saveSettings, importSettings } from '../lib/storage';
 import { FX_REFRESH_MS, fetchLiveRate, readCachedRate } from '../lib/fxRate';
 
@@ -47,7 +49,7 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     setFx((f) => ({ ...f, loading: true, error: null }));
     try {
       const r = await fetchLiveRate();
-      setSettings((prev) => ({ ...prev, usdTryKuru: Number(r.rate.toFixed(4)) }));
+      setSettings((prev) => ({ ...prev, usdTryKuru: math.round(r.rate, 4) }));
       setFx({ loading: false, error: null, fetchedAt: r.fetchedAt, source: r.source });
     } catch (e) {
       setFx((f) => ({ ...f, loading: false, error: (e as Error).message || 'Kur alınamadı' }));
@@ -62,8 +64,9 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     const cached = readCachedRate();
     if (cached) {
       setFx({ loading: false, error: null, fetchedAt: cached.fetchedAt, source: cached.source });
-      setSettings((prev) => ({ ...prev, usdTryKuru: Number(cached.rate.toFixed(4)) }));
+      setSettings((prev) => ({ ...prev, usdTryKuru: math.round(cached.rate, 4) }));
     }
+
     const stale = !cached || Date.now() - cached.fetchedAt > FX_REFRESH_MS;
     if (stale) void refreshRate();
 

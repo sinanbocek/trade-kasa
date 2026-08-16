@@ -1,4 +1,5 @@
 import React, { useMemo } from 'react';
+import { math } from '../../domain/abacus';
 
 /** Tek serili, 12+ noktalı mini trend çizgisi. Tek seri olduğu için ayrı lejant gerekmez. */
 export const Sparkline: React.FC<{
@@ -7,6 +8,8 @@ export const Sparkline: React.FC<{
   height?: number;
   color?: string;
 }> = ({ values, width = 240, height = 48, color = 'var(--accent)' }) => {
+  const r1 = (n: number) => math.round(n, 1);
+
   const { linePath, areaPath, lastX, lastY } = useMemo(() => {
     if (values.length === 0) return { linePath: '', areaPath: '', lastX: 0, lastY: 0 };
     const padX = 4;
@@ -30,8 +33,8 @@ export const Sparkline: React.FC<{
 
     const [fx, fy] = firstPoint;
     const [lx, ly] = lastPoint;
-    const line = points.map(([x, y], i) => `${i === 0 ? 'M' : 'L'}${x.toFixed(1)},${y.toFixed(1)}`).join(' ');
-    const area = `${line} L${lx.toFixed(1)},${height - padY} L${fx.toFixed(1)},${height - padY} Z`;
+    const line = points.map(([x, y], i) => `${i === 0 ? 'M' : 'L'}${r1(x)},${r1(y)}`).join(' ');
+    const area = `${line} L${r1(lx)},${r1(height - padY)} L${r1(fx)},${r1(height - padY)} Z`;
     void fy;
 
     return { linePath: line, areaPath: area, lastX: lx, lastY: ly };

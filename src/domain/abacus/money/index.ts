@@ -5,6 +5,7 @@ export interface FormatMoneyOptions {
   kurus?: boolean;
   form?: 'symbol' | 'text';
   negative?: 'minus' | 'paren';
+  currency?: 'TRY' | 'USD';
 }
 
 export interface ToWordsOptions {
@@ -34,10 +35,17 @@ export function format(kurus: number | null | undefined, opts?: FormatMoneyOptio
   const showKurus = opts?.kurus ?? false;
   const form = opts?.form ?? 'symbol';
   const negativeMode = opts?.negative ?? 'minus';
+  const cur = opts?.currency ?? 'TRY';
+  const symbol = cur === 'USD' ? '$' : '₺';
+  const textCode = cur === 'USD' ? 'USD' : 'TL';
 
   if (kurus === 0) {
+    if (form === 'text') {
+      return showKurus ? `0,00 ${textCode}` : `0 ${textCode}`;
+    }
     return showKurus ? '0,00' : '0';
   }
+
 
   const isNegative = kurus < 0;
   const absKurus = abs(kurus);
@@ -57,7 +65,7 @@ export function format(kurus: number | null | undefined, opts?: FormatMoneyOptio
     formattedNum = groupThousands(roundedTL);
   }
 
-  const resultWithForm = form === 'symbol' ? `₺${formattedNum}` : `${formattedNum} TL`;
+  const resultWithForm = form === 'symbol' ? `${symbol}${formattedNum}` : `${formattedNum} ${textCode}`;
 
   if (isNegative) {
     return negativeMode === 'paren' ? `(${resultWithForm})` : `-${resultWithForm}`;
@@ -65,6 +73,56 @@ export function format(kurus: number | null | undefined, opts?: FormatMoneyOptio
 
   return resultWithForm;
 }
+
+/**
+ * ABACUS yüzde biçimlendirme motoru (%12,3).
+ * Null / undefined / NaN için '—' (tire) döndürür.
+ */
+export function percent(value: number | null | undefined, digits = 1): string {
+  if (value === null || value === undefined || !Number.isFinite(value)) {
+    return '—';
+  }
+  const rounded = round(value, digits);
+  const roundedStr = String(rounded).replace('.', ',');
+  return `%${roundedStr}`;
+}
+
+/** Metin girişini (binlik ayraçlı) ham sayıya çevir — nokta binlik, virgül ondalık */
+export function parseNumber(val: string): number {
+  if (!val) return 0;
+  const clean = val.replace(/\./g, '').replace(',', '.').replace(/[^0-9.\-]/g, '');
+  const n = Number(clean);
+  return Number.isFinite(n) ? n : 0;
+}
+
+/** Ondalıklı sayıyı binlik ayraçlı (nokta) + ondalık (virgül) göster — ör. 70000 -> "70.000" */
+export function fmtDecimalGrouped(value: number | null | undefined, digits = 0): string {
+  if (value === null || value === undefined || !Number.isFinite(value)) return '0';
+  const rounded = round(value, digits);
+  const parts = String(rounded).split('.');
+  const intPart = parts[0] ? groupThousands(Number(parts[0])) : '0';
+  if (digits > 0) {
+    const decPart = (parts[1] || '').padEnd(digits, '0').slice(0, digits);
+    return `${intPart},${decPart}`;
+  }
+  return intPart;
+}
+
+/** Serbest ondalık giriş kutuları için CANLI biçimlendirme */
+export function formatGroupedInput(raw: string): string {
+  if (!raw) return '';
+  const clean = raw.replace(/[^0-9,]/g, '');
+  const firstComma = clean.indexOf(',');
+  const intPartRaw = firstComma === -1 ? clean : clean.slice(0, firstComma);
+  const decPart = firstComma === -1 ? '' : clean.slice(firstComma + 1).replace(/,/g, '');
+  const intDigits = intPartRaw.replace(/^0+(?=\d)/, '');
+  if (!intDigits && firstComma === -1) return '';
+  const grouped = groupThousands(Number(intDigits || 0));
+  if (firstComma === -1) return grouped;
+  return `${grouped || '0'},${decPart}`;
+}
+
+
 
 /**
  * ABACUS tutar yazısı motoru (çek/sözleşme "Yalnız..." formatı, ABACUS-SPEC §3.2).

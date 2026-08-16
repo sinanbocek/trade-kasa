@@ -1,8 +1,8 @@
 import React from 'react';
 import { DollarSign, Landmark, RefreshCw, TrendingUp, Wallet } from 'lucide-react';
 import { useSettings } from '../context/SettingsContext';
+import { math, money } from '../domain/abacus';
 import { totalKasaTRY, totalKasaTLPart, totalKasaUSDPart } from '../lib/calc';
-import { fmtCurrency } from '../lib/format';
 import { AllocationBar } from './charts/AllocationBar';
 
 function timeAgo(ts: number | null): string {
@@ -16,6 +16,9 @@ function timeAgo(ts: number | null): string {
   return `${Math.floor(h / 24)} gün önce`;
 }
 
+const fmtMoney = (val: number, currency: 'TRY' | 'USD' = 'TRY') =>
+  money.format(math.round(math.mul(val, 100)), { currency });
+
 /** Kur kutusuyla aynı görünümde kompakt bilgi çipi (içeriğe göre daralır, satır germez) */
 const StatChip: React.FC<{ icon: React.ReactNode; label: string; value: React.ReactNode; sub?: React.ReactNode }> = ({
   icon,
@@ -24,75 +27,54 @@ const StatChip: React.FC<{ icon: React.ReactNode; label: string; value: React.Re
   sub,
 }) => (
   <div
-    className="flex min-h-[64px] items-center gap-2.5 rounded-xl border px-3 py-2"
+    className="flex min-h-[64px] items-center gap-2.5 rounded-xl border px-3 py-2 backdrop-blur sm:shrink-0"
     style={{ borderColor: 'rgba(255,255,255,0.14)', background: 'rgba(255,255,255,0.06)' }}
   >
-    <span className="text-white/60">{icon}</span>
+    <div className="text-white/60">{icon}</div>
     <div>
       <span className="block text-[9px] font-bold uppercase tracking-wider text-white/50">{label}</span>
-      <span className="block text-sm font-bold tabular-nums leading-tight">
-        {value}
-        {sub && <span className="ml-1.5 text-[10px] font-medium text-white/45">{sub}</span>}
-      </span>
+      <span className="block text-sm font-bold tabular-nums leading-tight">{value}</span>
+      {sub && <span className="block text-[9px] text-white/40">{sub}</span>}
     </div>
   </div>
 );
 
 export const Hero: React.FC = () => {
   const { settings, fx, refreshRate } = useSettings();
-  const total = totalKasaTRY(settings);
-  const tlPart = totalKasaTLPart(settings);
-  const usdPart = totalKasaUSDPart(settings);
   const rate = settings.usdTryKuru || 0;
 
+  const total = totalKasaTRY(settings) ?? 0;
+  const tlPart = totalKasaTLPart(settings);
+  const usdPart = totalKasaUSDPart(settings);
+
   const segments = [
-    { label: 'BİST', value: settings.bistKasaTL || 0, color: 'var(--cat-1)', display: fmtCurrency(settings.bistKasaTL, 'TRY', 0) },
-    { label: 'VİOP', value: settings.viopKasaTL || 0, color: 'var(--cat-2)', display: fmtCurrency(settings.viopKasaTL, 'TRY', 0) },
-    { label: 'ABD', value: (settings.abdKasaUSD || 0) * rate, color: 'var(--cat-3)', display: fmtCurrency(settings.abdKasaUSD, 'USD', 0) },
-    { label: 'Kripto', value: (settings.kriptoKasaUSD || 0) * rate, color: 'var(--cat-4)', display: fmtCurrency(settings.kriptoKasaUSD, 'USD', 0) },
+    { label: 'BİST', value: settings.bistKasaTL, color: 'var(--cat-1)', display: fmtMoney(settings.bistKasaTL, 'TRY') },
+    { label: 'VİOP', value: settings.viopKasaTL, color: 'var(--cat-2)', display: fmtMoney(settings.viopKasaTL, 'TRY') },
+    { label: 'ABD', value: math.mul(settings.abdKasaUSD, rate), color: 'var(--cat-3)', display: fmtMoney(settings.abdKasaUSD, 'USD') },
+    { label: 'Kripto', value: math.mul(settings.kriptoKasaUSD, rate), color: 'var(--cat-4)', display: fmtMoney(settings.kriptoKasaUSD, 'USD') },
   ];
 
-  return (
-    <div
-      className="relative overflow-hidden rounded-2xl border p-4 text-white shadow-[var(--shadow-pop)] sm:p-5"
-      style={{
-        background: 'linear-gradient(120deg, #0a0b10 0%, #161a2c 30%, #232a4d 60%, #1a3a4a 85%, #0d2b30 100%)',
-        borderColor: 'rgba(255,255,255,0.08)',
-      }}
-    >
-      {/* İnce üst parlaklık — cam/premium hissi */}
-      <div
-        className="pointer-events-none absolute inset-0"
-        style={{ background: 'linear-gradient(180deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0) 45%)' }}
-      />
-      {/* Dekoratif accent glow'lar — saf süs, veri taşımaz */}
-      <div
-        className="pointer-events-none absolute -right-16 -top-20 size-56 rounded-full opacity-25 blur-3xl"
-        style={{ background: '#5b6ee8' }}
-      />
-      <div
-        className="pointer-events-none absolute -bottom-20 -left-10 size-56 rounded-full opacity-20 blur-3xl"
-        style={{ background: '#14b8a6' }}
-      />
 
-      <div className="relative flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-        {/* Hero: Toplam Kasa — tek belirgin büyük rakam */}
+  return (
+    <div className="relative overflow-hidden rounded-2xl p-5 text-white shadow-xl sm:p-6" style={{ background: 'var(--hero-bg)' }}>
+      <div className="relative z-10 flex flex-col gap-5 md:flex-row md:items-center md:justify-between">
+        {/* Sol: Başlık ve toplam bakiye */}
         <div>
           <span className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-widest text-white/50">
             <Wallet size={13} /> Toplam Kasa Bakiyesi
           </span>
-          <div className="text-3xl font-extrabold tabular-nums sm:text-[38px]">{fmtCurrency(total, 'TRY', 0)}</div>
+          <div className="text-3xl font-extrabold tabular-nums sm:text-[38px]">{fmtMoney(total, 'TRY')}</div>
           <span className="block text-[11px] text-white/45">TL kasalar + USD kasaların TL karşılığı</span>
         </div>
 
         {/* Kompakt çip grubu: TL Kasa, USD Kasa, Kur — hepsi aynı hizada */}
         <div className="flex flex-wrap gap-2 sm:justify-end">
-          <StatChip icon={<Landmark size={15} />} label="TL Kasa (BİST + VİOP)" value={fmtCurrency(tlPart, 'TRY', 0)} />
+          <StatChip icon={<Landmark size={15} />} label="TL Kasa (BİST + VİOP)" value={fmtMoney(tlPart, 'TRY')} />
           <StatChip
             icon={<DollarSign size={15} />}
             label="USD Kasa (ABD + Kripto)"
-            value={fmtCurrency(usdPart, 'USD', 0)}
-            sub={`≈ ${fmtCurrency(usdPart * rate, 'TRY', 0)}`}
+            value={fmtMoney(usdPart, 'USD')}
+            sub={`≈ ${fmtMoney(math.mul(usdPart, rate), 'TRY')}`}
           />
 
           {/* Kur kutusu */}
@@ -107,7 +89,7 @@ export const Hero: React.FC = () => {
             <div>
               <span className="block text-[9px] font-bold uppercase tracking-wider text-white/50">USD/TRY</span>
               <span className="block text-sm font-bold tabular-nums leading-tight">
-                {rate.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 4 })}
+                {String(math.round(rate, 2)).replace('.', ',')}
               </span>
               <span className="block text-[9px] text-white/40">
                 {fx.loading ? 'güncelleniyor…' : fx.error ? 'canlı alınamadı' : timeAgo(fx.fetchedAt)}

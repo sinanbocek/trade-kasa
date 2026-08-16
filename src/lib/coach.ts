@@ -7,7 +7,12 @@
 // tanımlanır. Saf fonksiyon — React/store bağımlılığı yoktur.
 // ====================================================================
 import type { MarketConfig, Settings, TradeInput, TradeResult } from '../types';
-import { fmtCurrency, fmtDecimal } from './format';
+import { math, money } from '../domain/abacus';
+
+const fmtDecimal = (v: number, d = 1) => String(math.round(v, d)).replace('.', ',');
+const fmtCurrency = (v: number, currency: 'TRY' | 'USD' = 'TRY', digits = 2) =>
+  money.format(math.round(math.mul(v, 100)), { currency, kurus: digits > 0 });
+
 
 export type InsightLevel = 'critical' | 'warning' | 'good' | 'info';
 

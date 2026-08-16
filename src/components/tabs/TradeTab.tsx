@@ -2,10 +2,10 @@ import React, { useMemo, useState } from 'react';
 import { AlertTriangle, Eraser, Lightbulb, Save, Trash2 } from 'lucide-react';
 import type { Direction, MarketConfig, TradeInput } from '../../types';
 import { useSettings } from '../../context/SettingsContext';
+import { math, money } from '../../domain/abacus';
 import { computeTrade } from '../../domain/abacus/trading';
 import { qtyFromVolume, volumeFromQty } from '../../lib/calc';
 import { buildInsights, MAX_VISIBLE_INSIGHTS } from '../../lib/coach';
-import { fmtCurrency, fmtDecimal, fmtDecimalGrouped, fmtPct, parseNumber } from '../../lib/format';
 import { historyForMarket } from '../../lib/history';
 import { useHistory } from '../../hooks/useHistory';
 import { Meter } from '../charts/Meter';
@@ -13,8 +13,16 @@ import { Sparkline } from '../charts/Sparkline';
 import { CoachPanel } from '../coach/CoachPanel';
 import { Card, ConfirmDialog, DirectionToggle, InfoTip, NumField, Row } from '../ui';
 
+const parseNumber = money.parseNumber;
+const fmtDecimalGrouped = money.fmtDecimalGrouped;
+const fmtPct = money.percent;
+const fmtDecimal = (v: number, d = 1) => String(math.round(v, d)).replace('.', ',');
+const fmtCurrency = (v: number | null | undefined, currency: 'TRY' | 'USD' = 'TRY', digits = 2) =>
+  money.format(v !== null && v !== undefined ? math.round(math.mul(v, 100)) : null, { currency, kurus: digits > 0 });
+
 const showOrDash = (val: number | null, formatter: (n: number) => string) =>
   val === null ? '—' : formatter(val);
+
 
 
 interface Props {

@@ -223,5 +223,12 @@
   - `!`, `?? 0` ve `as number` kullanımı 0; tam TypeScript tip daraltması (type narrowing) uygulandı.
   - 21 `coach.ts` tsc hatası çözüldü; `npx tsc --noEmit` ilk kez **0 HATA** verdi.
   - Vitest birim ve denklik testleri (219 test) %100 YEŞİL geçti; linter 0 hata verdi.
+- **Adım 4d (format.ts ABACUS Geçişi & format.ts Silme & 14 Warn Eritme)** tamamlandı:
+  - Eski `src/lib/format.ts` dosyası tamamen silindi; tüm formatlama işlemleri ABACUS `money` ve `date` motorlarına bağlandı.
+  - TCMB standartlarına uygun gösterime geçildi (para birimi simgesi solda, boşluksuz, kuruşsuz varsayılan).
+  - USD para birimi seçeneği ve `percent` gösterim fonksiyonu ABACUS `money` motoruna eklendi.
+  - 14 linter uyarısının tamamı eritilerek `npm run lint` **0 HATA, 0 UYARI** seviyesine ulaştı.
+  - `npx tsc --noEmit` 0 hata, Vitest testleri (223 test) %100 YEŞİL geçti.
+
 
 

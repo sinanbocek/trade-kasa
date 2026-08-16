@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { compact, format, toWords } from './index';
+import { compact, format, percent, toWords } from './index';
+
 
 describe('ABACUS money.format motoru', () => {
   it('varsayılan biçim: simge solda, kuruşsuz (2323223 kuruş -> ₺23.232)', () => {
@@ -50,7 +51,28 @@ describe('ABACUS money.format motoru', () => {
   it('kuruşsuz gösterimde half-up yuvarlama (2323250 kuruş = 23.232,50 TL -> ₺23.233)', () => {
     expect(format(2323250)).toBe('₺23.233');
   });
+
+  it('USD para birimi desteği (22075 kuruş = $220.75 -> $221)', () => {
+    expect(format(22075, { currency: 'USD' })).toBe('$221');
+    expect(format(22075, { currency: 'USD', kurus: true })).toBe('$220,75');
+  });
 });
+
+describe('ABACUS money.percent motoru', () => {
+  it('yüzde biçimlendirme: 12.345 -> %12,3', () => {
+    expect(percent(12.345, 1)).toBe('%12,3');
+  });
+
+  it('yüzde 2 basamak: 2.5678 -> %2,57', () => {
+    expect(percent(2.5678, 2)).toBe('%2,57');
+  });
+
+  it('null/undefined yüzde: "—"', () => {
+    expect(percent(null)).toBe('—');
+    expect(percent(undefined)).toBe('—');
+  });
+});
+
 
 describe('ABACUS money.toWords motoru', () => {
   it('32000000 kuruş -> Yalnız ÜçYüzYirmiBinTürkLirası', () => {

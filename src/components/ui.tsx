@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { AlertTriangle } from 'lucide-react';
-import { formatGroupedInput } from '../lib/format';
+import { money } from '../domain/abacus';
+
 
 /** Küçük "i" bilgi ikonu — üzerine gelince/tıklayınca açıklama gösterir */
 export const InfoTip: React.FC<{ text: string; align?: 'left' | 'center' }> = ({ text, align = 'center' }) => {
@@ -183,7 +184,8 @@ export const NumField: React.FC<{
           autoComplete="off"
           placeholder={placeholder}
           value={value}
-          onChange={(e) => onChange(formatGroupedInput(e.target.value))}
+          onChange={(e) => onChange(money.formatGroupedInput(e.target.value))}
+
           style={{ ...accentStyle, borderColor: 'var(--border)' }}
           className={`w-full rounded-xl border bg-[var(--surface)] px-3.5 py-2.5 text-sm font-semibold outline-none transition-colors placeholder:text-[var(--muted)] focus:border-[var(--accent)] focus:ring-2 focus:ring-[var(--accent-soft-strong)] ${suffix ? 'pr-9' : ''}`}
         />

@@ -4,8 +4,12 @@ import type { Settings } from '../../types';
 import { useSettings } from '../../context/SettingsContext';
 import { useTheme } from '../../context/ThemeContext';
 import { exportSettings } from '../../lib/storage';
-import { fmtDecimalGrouped, formatGroupedInput, parseNumber } from '../../lib/format';
+import { money } from '../../domain/abacus';
 import { ConfirmDialog, InfoTip } from '../ui';
+
+const fmtDecimalGrouped = money.fmtDecimalGrouped;
+const formatGroupedInput = money.formatGroupedInput;
+const parseNumber = money.parseNumber;
 
 /** Ayar için sayı girişi — yerel metin taslağı tutar, dışarıdan değişince eşitler */
 const SettingNumber: React.FC<{
@@ -25,8 +29,8 @@ const SettingNumber: React.FC<{
     if (!focused.current && parseNumber(text) !== value) {
       setText(fmtDecimalGrouped(value, digits));
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [value]);
+  }, [value, text, digits]);
+
 
   return (
     <label className="block space-y-1.5">
